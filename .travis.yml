@@ -8,7 +8,6 @@ install:
 - go get github.com/kisielk/errcheck
 - go get github.com/golang/lint/golint
 - go get github.com/golang/dep/cmd/dep
-- dep ensure -v -vendor-only
 script:
 - gometalinter.v1 --vendor --disable-all --enable=vet --enable=golint --enable=ineffassign
   --enable=goconst --tests ./...
@@ -22,4 +21,4 @@ deploy:
     tags: true
 env:
   global:
-    secure: ZjK6FyyB4KQiV7XpTZ15VgW/0+vNnb9BSvzy1q4mpeifX07Qqlm6cTown0n/T0365SmOTusS3bMqSb9NUdqsfN09AzDB2nhaNK+vb4rJLo9nLCka4Vk/otBdFfPJcQxkzd5YFZWo+zYxtZDWMUCqO58eKRq/z2QNqV24/u2IOJg3KP4hVqog1o5YZETgIwKAr/aQ3KG3ko0vr2W/t2ksp0ZISefNHdwZoUrl3YaTcu7UU+zNn1lKC6cRZJgTVDez/yc4mmcWtX85ehm1YFnSl4BKRCFjFHN4aiaJcSVHov4kicy1Q78sbELJBThzSn33//JHoUzGWiR1em4Kj9QEKWT7f1idoDBkWK5PTFJ4Tu/x8lkCmoKM47jMuIfTNuM0hKtHUGrznDYcPJAw0qTTNhcbJ7HlCCQ1DBnYCOmA0onbuquVsjmSarUZEJtUHVBDGpQ5B6iyzvfI69+hMz7PNMzrHSaZVis57s02QGWah2qwO0oFyIrPCo0e9lb8osTNkppn7mGa2n3lNnMY8Gz2FaPpvOLvxkkUE+75oZ6hhofVcfc6wAMeFuaMNST6NqTojH84Q37ByR4oX9bUiKvjaPiK6fUpqHyt7+SaAZP/e1mNZ9fjtaQrkyV/ST+5ei9UfaClsEz5qh3ZM/nzNibMTrVDtBc7++Y9C+vSy+7sVko=
+    secure: AAAAB3NzaC1yc2EAAAADAQABAAACAQDsmwE99enDLhJTlatsLmwEygmpdPRplqtL69MO07vnhgMOrl/1dniuLM8Z4uBNKZ3qNEOlXBKdhhW9fFiAC/HnGbB0t8AjgK7EECfEl1jz2825eCsbCODx9aIyOtEbWbOwxKfGSU/kQ4n6tNgYq0YM33J20m//1RgektRjXByWHUyMZnTzdREauzmAUOmf8dit22UNCMZgFX1JfG7H6skj91LfiS9nBZMUDVWZwRnaqBEcifT93ZZ0RWRQD+mfCKq7wW2H3oIjAdkGpE9yoZlkBsvB0eUIT8K6+atmRYqDKudG1ZK9Z1l1eUgZPSWKCsxeFbNVfcpUBYjZwirZ0yo1iaA04xtsulEbFqRdvrULLE3MUWv3e97CfZtjAdjvDJ7mnRxOnmksxbLxnps+f/Gkku9O1PF24I2EtPtA4QOJZD1zOuF3IN6LvZz2iGNEnOYiKL9XufZ70dEh+M6FQ0JK+qAC5m23/nkKaKgURahCMrpMZYD9zkPMcIXcLB3AgZV9VWrWLA76IzF1gyMDMOykWAb0o9qDKwSCTCD3nCHZh9KRdT9sMuURb+eIG74eZ9zoImblUI0twSikmPCtyeUYMZyk2dfRqyy6cRhV4MKP/tlcy0hfNqODnvF0WVBAcnMIY+kOGpAq/R+LMmDWUtYGomZbGnClq74zDZ1yqDzPSw==
