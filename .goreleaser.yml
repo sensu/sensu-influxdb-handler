@@ -1,0 +1,62 @@
+builds:
+  - main: main.go
+    binary: sensu-influxdb-handler
+    goos:
+      #-android
+      - darwin
+      - dragonfly
+      - freebsd
+      - linux
+      - netbsd
+      #- openbsd # TODO: fix up gopsutil to not require CGO
+      #- plan9
+      - solaris
+      - windows
+    goarch:
+      - amd64
+      - 386
+      - arm
+      - arm64
+      - ppc64
+      - ppc64le
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+    goarm:
+      - 5
+      - 6
+      - 7
+    ignore:
+      # TODO: add freebsd/arm support to gopsutil
+      - goos: freebsd
+        goarch: arm
+      # TODO: add linux/ppc64 support to gopsutil
+      - goos: linux
+        goarch: ppc64
+        # TODO: add linux/mips64 support to gopsutil
+      - goos: linux
+        goarch: mips64
+        # TODO: add linux/mips64le support to gopsutil
+      - goos: linux
+        goarch: mips64le
+
+archive:
+  format: tar.gz
+  files:
+    - LICENSE
+    - README.md
+    - CHANGELOG.md
+
+release:
+  draft: true
+  prerelease: true
+
+  # You can change the name of the GitHub release.
+  # This is parsed with the Go template engine and the following variables
+  # are available:
+  # - ProjectName
+  # - Tag
+  # - Version (Git tag without `v` prefix)
+  # Default is ``
+  #name_template: "{{.ProjectName}}-v{{.Version}}"

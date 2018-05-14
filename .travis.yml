@@ -1,0 +1,25 @@
+language: go
+go:
+- 1.10.x
+install:
+- go get gopkg.in/alecthomas/gometalinter.v1
+- go get github.com/gordonklaus/ineffassign
+- go get github.com/jgautheron/goconst/cmd/goconst
+- go get github.com/kisielk/errcheck
+- go get github.com/golang/lint/golint
+- go get github.com/golang/dep/cmd/dep
+- dep ensure -v -vendor-only
+script:
+- gometalinter.v1 --vendor --disable-all --enable=vet --enable=golint --enable=ineffassign
+  --enable=goconst --tests ./...
+before_deploy:
+- go get github.com/goreleaser/goreleaser
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: goreleaser
+  on:
+    tags: true
+env:
+  global:
+    secure: ZjK6FyyB4KQiV7XpTZ15VgW/0+vNnb9BSvzy1q4mpeifX07Qqlm6cTown0n/T0365SmOTusS3bMqSb9NUdqsfN09AzDB2nhaNK+vb4rJLo9nLCka4Vk/otBdFfPJcQxkzd5YFZWo+zYxtZDWMUCqO58eKRq/z2QNqV24/u2IOJg3KP4hVqog1o5YZETgIwKAr/aQ3KG3ko0vr2W/t2ksp0ZISefNHdwZoUrl3YaTcu7UU+zNn1lKC6cRZJgTVDez/yc4mmcWtX85ehm1YFnSl4BKRCFjFHN4aiaJcSVHov4kicy1Q78sbELJBThzSn33//JHoUzGWiR1em4Kj9QEKWT7f1idoDBkWK5PTFJ4Tu/x8lkCmoKM47jMuIfTNuM0hKtHUGrznDYcPJAw0qTTNhcbJ7HlCCQ1DBnYCOmA0onbuquVsjmSarUZEJtUHVBDGpQ5B6iyzvfI69+hMz7PNMzrHSaZVis57s02QGWah2qwO0oFyIrPCo0e9lb8osTNkppn7mGa2n3lNnMY8Gz2FaPpvOLvxkkUE+75oZ6hhofVcfc6wAMeFuaMNST6NqTojH84Q37ByR4oX9bUiKvjaPiK6fUpqHyt7+SaAZP/e1mNZ9fjtaQrkyV/ST+5ei9UfaClsEz5qh3ZM/nzNibMTrVDtBc7++Y9C+vSy+7sVko=
