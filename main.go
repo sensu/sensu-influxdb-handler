@@ -131,7 +131,7 @@ func sendMetrics(event *types.Event) error {
 			tagKey = "value"
 		}
 		fields := map[string]interface{}{tagKey: point.Value}
-		timestamp := time.Unix(0, point.Timestamp)
+		timestamp := time.Unix(point.Timestamp, 0)
 		tags := make(map[string]string)
 		for _, tag := range point.Tags {
 			tags[tag.Name] = tag.Value

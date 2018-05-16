@@ -1,6 +1,7 @@
 cpu () {
 	echo $(hostname).cpu $(ps axo %cpu | awk '{ sum+=$1 } END { printf "%.1f\n", sum }' | tail -n 1) $(date +%s)
 }
+
 disk_io () {
 	iostat=($(iostat -K -d -c 1 disk0))
 	echo $(hostname).disk_io "${iostat[6]}" $(date +%s)
