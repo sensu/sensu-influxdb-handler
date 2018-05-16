@@ -41,11 +41,6 @@ ping_ok () {
   	fi
 }
 
-swap () {
-	echo $(hostname).swap $(sysctl -n vm.swapusage |
-              awk '{ if (int($3) == 0) exit; printf "%.1f", $6 / $3 * 100.0 }') $(date +%s)
-}
-
 cpu
 disk_io
 disk_usage
@@ -53,4 +48,3 @@ heartbeat
 memory
 network_io
 ping_ok
-swap
