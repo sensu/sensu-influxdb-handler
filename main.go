@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -131,7 +132,15 @@ func sendMetrics(event *types.Event) error {
 			tagKey = "value"
 		}
 		fields := map[string]interface{}{tagKey: point.Value}
-		timestamp := time.Unix(point.Timestamp, 0)
+		stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
+		if len(stringTimestamp) > 10 {
+			stringTimestamp = stringTimestamp[:10]
+		}
+		t, err := strconv.ParseInt(stringTimestamp, 10, 64)
+		if err != nil {
+			return err
+		}
+		timestamp := time.Unix(t, 0)
 		tags := make(map[string]string)
 		for _, tag := range point.Tags {
 			tags[tag.Name] = tag.Value

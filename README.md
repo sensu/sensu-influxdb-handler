@@ -38,7 +38,7 @@ Example Sensu 2.x check definition:
     "system"
   ],
   "output_metric_format": "graphite_plaintext",
-  "output_metric_handlers": [sensu-influxdb-handler]
+  "output_metric_handlers": [influx-db]
 }
 ```
 That's right, you can collect different types of metrics (ex. Graphite), Sensu

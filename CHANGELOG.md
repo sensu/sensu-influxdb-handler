@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.2] - 2018-05-21
+### Added
+- `metrics-graphite.sh` to examples
+- `metrics-influx.sh` to examples
+- `metrics-nagios.sh` to examples
+- `metrics-opentsdb.sh` to examples
+- `metrics-statsd.sh` to examples
+
+### Fixed
+- Fixed errata in `README.md` where example handler name was inconsistent
+- Fixed bug for StatsD timestamps
+
 ## [v1.1] - 2018-05-16
 ### Added
 - `metrics.sh` script to `examples` directory
