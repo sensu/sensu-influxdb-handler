@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.2] - 2018-06-21
+### Added `CGO_ENABLED=0` to build environment
+
 ## [v1.2] - 2018-05-21
 ### Added
 - `metrics-graphite.sh` to examples
