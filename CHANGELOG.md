@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.4] - 2018-06-21
+### Added
+- Added `CGO_ENABLED=0` to goreleaser build environment
+
 ## [v1.3] - 2018-06-21
-### Added `CGO_ENABLED=0` to build environment
+### Added
+- Added `CGO_ENABLED=0` to travis build environment
 
 ## [v1.2] - 2018-05-21
 ### Added
