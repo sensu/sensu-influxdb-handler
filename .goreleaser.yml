@@ -48,10 +48,6 @@ archive:
     - README.md
     - CHANGELOG.md
 
-release:
-  draft: true
-  prerelease: true
-
   # You can change the name of the GitHub release.
   # This is parsed with the Go template engine and the following variables
   # are available:
