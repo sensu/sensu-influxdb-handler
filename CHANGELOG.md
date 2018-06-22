@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.5] - 2018-06-22
+### Added
+- Added `sensu_entity_id` tag
+
 ## [v1.4] - 2018-06-21
 ### Added
 - Added `CGO_ENABLED=0` to goreleaser build environment
