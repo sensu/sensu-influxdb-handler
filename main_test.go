@@ -21,7 +21,7 @@ func TestSendMetrics(t *testing.T) {
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
-		expectedBody := `answer,foo=bar value=42`
+		expectedBody := `answer,foo=bar,sensu_entity_id=entity1 value=42`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(`{"ok": true}`))
