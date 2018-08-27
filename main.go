@@ -42,7 +42,7 @@ func configureRootCommand() *cobra.Command {
 		"addr",
 		"a",
 		"",
-		"the address of the influx-db server")
+		"the address of the influx-db server, should be of the form 'http://host:port'")
 
 	cmd.Flags().StringVarP(&dbName,
 		"db-name",
