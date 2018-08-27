@@ -24,7 +24,7 @@ Example Sensu 2.x handler definition:
 {
   "name": "influx-db",
   "type": "pipe",
-  "command": "sensu-influxdb-handler --addr '123.4.5.6:8086' --username 'foo' --password 'bar' --db-name 'myDB'"
+  "command": "sensu-influxdb-handler --addr 'http://123.4.5.6:8086' --username 'foo' --password 'bar' --db-name 'myDB'"
 }
 ```
 
