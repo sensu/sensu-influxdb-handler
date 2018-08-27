@@ -1,4 +1,5 @@
 # Sensu InfluxDB Handler
+TravisCI: [![TravisCI Build Status](https://travis-ci.org/nikkiki/sensu-influxdb-handler.svg?branch=master)](https://travis-ci.org/nikkiki/sensu-influxdb-handler)
 
 The Sensu InfluxDB Handler is a [Sensu Event Handler][3] that sends metrics to
 the time series database [InfluxDB][2]. [Sensu][1] can collect metrics using
