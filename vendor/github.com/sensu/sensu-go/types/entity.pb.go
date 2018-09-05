@@ -17,6 +17,12 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 // Entity is the Entity supplying the event. The default Entity for any
 // Event is the running Agent process--if the Event is sent by an Agent.
 type Entity struct {
@@ -25,7 +31,7 @@ type Entity struct {
 	System           System         `protobuf:"bytes,3,opt,name=system" json:"system"`
 	Subscriptions    []string       `protobuf:"bytes,4,rep,name=subscriptions" json:"subscriptions"`
 	LastSeen         int64          `protobuf:"varint,5,opt,name=last_seen,json=lastSeen,proto3" json:"last_seen"`
-	Deregister       bool           `protobuf:"varint,6,opt,name=deregister,proto3" json:"deregister,omitempty"`
+	Deregister       bool           `protobuf:"varint,6,opt,name=deregister,proto3" json:"deregister"`
 	Deregistration   Deregistration `protobuf:"bytes,7,opt,name=deregistration" json:"deregistration"`
 	KeepaliveTimeout uint32         `protobuf:"varint,8,opt,name=keepalive_timeout,json=keepaliveTimeout,proto3" json:"keepalive_timeout"`
 	Environment      string         `protobuf:"bytes,9,opt,name=environment,proto3" json:"environment,omitempty"`
@@ -34,13 +40,44 @@ type Entity struct {
 	// ExtendedAttributes store serialized arbitrary JSON-encoded data
 	ExtendedAttributes []byte `protobuf:"bytes,12,opt,name=extended_attributes,json=extendedAttributes,proto3" json:"-"`
 	// Redact contains the fields to redact on the agent
-	Redact []string `protobuf:"bytes,13,rep,name=redact" json:"redact,omitempty"`
+	Redact               []string `protobuf:"bytes,13,rep,name=redact" json:"redact,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *Entity) Reset()                    { *m = Entity{} }
-func (m *Entity) String() string            { return proto.CompactTextString(m) }
-func (*Entity) ProtoMessage()               {}
-func (*Entity) Descriptor() ([]byte, []int) { return fileDescriptorEntity, []int{0} }
+func (m *Entity) Reset()         { *m = Entity{} }
+func (m *Entity) String() string { return proto.CompactTextString(m) }
+func (*Entity) ProtoMessage()    {}
+func (*Entity) Descriptor() ([]byte, []int) {
+	return fileDescriptor_entity_ba28f61a92b551bd, []int{0}
+}
+func (m *Entity) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Entity) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Entity.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *Entity) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Entity.Merge(dst, src)
+}
+func (m *Entity) XXX_Size() int {
+	return m.Size()
+}
+func (m *Entity) XXX_DiscardUnknown() {
+	xxx_messageInfo_Entity.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Entity proto.InternalMessageInfo
 
 func (m *Entity) GetID() string {
 	if m != nil {
@@ -136,19 +173,50 @@ func (m *Entity) GetRedact() []string {
 // System contains information about the system that the Agent process
 // is running on, used for additional Entity context.
 type System struct {
-	Hostname        string  `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	OS              string  `protobuf:"bytes,2,opt,name=os,proto3" json:"os,omitempty"`
-	Platform        string  `protobuf:"bytes,3,opt,name=platform,proto3" json:"platform,omitempty"`
-	PlatformFamily  string  `protobuf:"bytes,4,opt,name=platform_family,json=platformFamily,proto3" json:"platform_family,omitempty"`
-	PlatformVersion string  `protobuf:"bytes,5,opt,name=platform_version,json=platformVersion,proto3" json:"platform_version,omitempty"`
-	Network         Network `protobuf:"bytes,6,opt,name=network" json:"network"`
-	Arch            string  `protobuf:"bytes,7,opt,name=arch,proto3" json:"arch,omitempty"`
+	Hostname             string   `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	OS                   string   `protobuf:"bytes,2,opt,name=os,proto3" json:"os,omitempty"`
+	Platform             string   `protobuf:"bytes,3,opt,name=platform,proto3" json:"platform,omitempty"`
+	PlatformFamily       string   `protobuf:"bytes,4,opt,name=platform_family,json=platformFamily,proto3" json:"platform_family,omitempty"`
+	PlatformVersion      string   `protobuf:"bytes,5,opt,name=platform_version,json=platformVersion,proto3" json:"platform_version,omitempty"`
+	Network              Network  `protobuf:"bytes,6,opt,name=network" json:"network"`
+	Arch                 string   `protobuf:"bytes,7,opt,name=arch,proto3" json:"arch,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *System) Reset()                    { *m = System{} }
-func (m *System) String() string            { return proto.CompactTextString(m) }
-func (*System) ProtoMessage()               {}
-func (*System) Descriptor() ([]byte, []int) { return fileDescriptorEntity, []int{1} }
+func (m *System) Reset()         { *m = System{} }
+func (m *System) String() string { return proto.CompactTextString(m) }
+func (*System) ProtoMessage()    {}
+func (*System) Descriptor() ([]byte, []int) {
+	return fileDescriptor_entity_ba28f61a92b551bd, []int{1}
+}
+func (m *System) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *System) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_System.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *System) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_System.Merge(dst, src)
+}
+func (m *System) XXX_Size() int {
+	return m.Size()
+}
+func (m *System) XXX_DiscardUnknown() {
+	xxx_messageInfo_System.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_System proto.InternalMessageInfo
 
 func (m *System) GetHostname() string {
 	if m != nil {
@@ -203,13 +271,44 @@ func (m *System) GetArch() string {
 // that the Agent process is running on, used for additional Entity
 // context.
 type Network struct {
-	Interfaces []NetworkInterface `protobuf:"bytes,1,rep,name=interfaces" json:"interfaces"`
+	Interfaces           []NetworkInterface `protobuf:"bytes,1,rep,name=interfaces" json:"interfaces"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
-func (m *Network) Reset()                    { *m = Network{} }
-func (m *Network) String() string            { return proto.CompactTextString(m) }
-func (*Network) ProtoMessage()               {}
-func (*Network) Descriptor() ([]byte, []int) { return fileDescriptorEntity, []int{2} }
+func (m *Network) Reset()         { *m = Network{} }
+func (m *Network) String() string { return proto.CompactTextString(m) }
+func (*Network) ProtoMessage()    {}
+func (*Network) Descriptor() ([]byte, []int) {
+	return fileDescriptor_entity_ba28f61a92b551bd, []int{2}
+}
+func (m *Network) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Network) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Network.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *Network) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Network.Merge(dst, src)
+}
+func (m *Network) XXX_Size() int {
+	return m.Size()
+}
+func (m *Network) XXX_DiscardUnknown() {
+	xxx_messageInfo_Network.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Network proto.InternalMessageInfo
 
 func (m *Network) GetInterfaces() []NetworkInterface {
 	if m != nil {
@@ -221,15 +320,46 @@ func (m *Network) GetInterfaces() []NetworkInterface {
 // NetworkInterface contains information about a system network
 // interface.
 type NetworkInterface struct {
-	Name      string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	MAC       string   `protobuf:"bytes,2,opt,name=mac,proto3" json:"mac,omitempty"`
-	Addresses []string `protobuf:"bytes,3,rep,name=addresses" json:"addresses"`
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	MAC                  string   `protobuf:"bytes,2,opt,name=mac,proto3" json:"mac,omitempty"`
+	Addresses            []string `protobuf:"bytes,3,rep,name=addresses" json:"addresses"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *NetworkInterface) Reset()                    { *m = NetworkInterface{} }
-func (m *NetworkInterface) String() string            { return proto.CompactTextString(m) }
-func (*NetworkInterface) ProtoMessage()               {}
-func (*NetworkInterface) Descriptor() ([]byte, []int) { return fileDescriptorEntity, []int{3} }
+func (m *NetworkInterface) Reset()         { *m = NetworkInterface{} }
+func (m *NetworkInterface) String() string { return proto.CompactTextString(m) }
+func (*NetworkInterface) ProtoMessage()    {}
+func (*NetworkInterface) Descriptor() ([]byte, []int) {
+	return fileDescriptor_entity_ba28f61a92b551bd, []int{3}
+}
+func (m *NetworkInterface) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *NetworkInterface) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_NetworkInterface.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *NetworkInterface) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NetworkInterface.Merge(dst, src)
+}
+func (m *NetworkInterface) XXX_Size() int {
+	return m.Size()
+}
+func (m *NetworkInterface) XXX_DiscardUnknown() {
+	xxx_messageInfo_NetworkInterface.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_NetworkInterface proto.InternalMessageInfo
 
 func (m *NetworkInterface) GetName() string {
 	if m != nil {
@@ -254,13 +384,44 @@ func (m *NetworkInterface) GetAddresses() []string {
 
 // Deregistration contains configuration for Sensu entity de-registration.
 type Deregistration struct {
-	Handler string `protobuf:"bytes,1,opt,name=handler,proto3" json:"handler,omitempty"`
+	Handler              string   `protobuf:"bytes,1,opt,name=handler,proto3" json:"handler,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *Deregistration) Reset()                    { *m = Deregistration{} }
-func (m *Deregistration) String() string            { return proto.CompactTextString(m) }
-func (*Deregistration) ProtoMessage()               {}
-func (*Deregistration) Descriptor() ([]byte, []int) { return fileDescriptorEntity, []int{4} }
+func (m *Deregistration) Reset()         { *m = Deregistration{} }
+func (m *Deregistration) String() string { return proto.CompactTextString(m) }
+func (*Deregistration) ProtoMessage()    {}
+func (*Deregistration) Descriptor() ([]byte, []int) {
+	return fileDescriptor_entity_ba28f61a92b551bd, []int{4}
+}
+func (m *Deregistration) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Deregistration) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Deregistration.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *Deregistration) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Deregistration.Merge(dst, src)
+}
+func (m *Deregistration) XXX_Size() int {
+	return m.Size()
+}
+func (m *Deregistration) XXX_DiscardUnknown() {
+	xxx_messageInfo_Deregistration.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Deregistration proto.InternalMessageInfo
 
 func (m *Deregistration) GetHandler() string {
 	if m != nil {
@@ -278,10 +439,7 @@ func init() {
 }
 func (this *Entity) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*Entity)
@@ -294,10 +452,7 @@ func (this *Entity) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
@@ -350,14 +505,14 @@ func (this *Entity) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
+		return false
+	}
 	return true
 }
 func (this *System) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*System)
@@ -370,10 +525,7 @@ func (this *System) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
@@ -398,14 +550,14 @@ func (this *System) Equal(that interface{}) bool {
 	if this.Arch != that1.Arch {
 		return false
 	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
+		return false
+	}
 	return true
 }
 func (this *Network) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*Network)
@@ -418,10 +570,7 @@ func (this *Network) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
@@ -433,14 +582,14 @@ func (this *Network) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
+		return false
+	}
 	return true
 }
 func (this *NetworkInterface) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*NetworkInterface)
@@ -453,10 +602,7 @@ func (this *NetworkInterface) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
@@ -474,14 +620,14 @@ func (this *NetworkInterface) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
+		return false
+	}
 	return true
 }
 func (this *Deregistration) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*Deregistration)
@@ -494,14 +640,14 @@ func (this *Deregistration) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
 	if this.Handler != that1.Handler {
+		return false
+	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
 		return false
 	}
 	return true
@@ -623,6 +769,9 @@ func (m *Entity) MarshalTo(dAtA []byte) (int, error) {
 			i += copy(dAtA[i:], s)
 		}
 	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	return i, nil
 }
 
@@ -685,6 +834,9 @@ func (m *System) MarshalTo(dAtA []byte) (int, error) {
 		i = encodeVarintEntity(dAtA, i, uint64(len(m.Arch)))
 		i += copy(dAtA[i:], m.Arch)
 	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	return i, nil
 }
 
@@ -714,6 +866,9 @@ func (m *Network) MarshalTo(dAtA []byte) (int, error) {
 			}
 			i += n
 		}
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	return i, nil
 }
@@ -760,6 +915,9 @@ func (m *NetworkInterface) MarshalTo(dAtA []byte) (int, error) {
 			i += copy(dAtA[i:], s)
 		}
 	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	return i, nil
 }
 
@@ -783,6 +941,9 @@ func (m *Deregistration) MarshalTo(dAtA []byte) (int, error) {
 		i++
 		i = encodeVarintEntity(dAtA, i, uint64(len(m.Handler)))
 		i += copy(dAtA[i:], m.Handler)
+	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	return i, nil
 }
@@ -829,6 +990,7 @@ func NewPopulatedEntity(r randyEntity, easy bool) *Entity {
 		this.Redact[i] = string(randStringEntity(r))
 	}
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedEntity(r, 14)
 	}
 	return this
 }
@@ -844,6 +1006,7 @@ func NewPopulatedSystem(r randyEntity, easy bool) *System {
 	this.Network = *v6
 	this.Arch = string(randStringEntity(r))
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedEntity(r, 8)
 	}
 	return this
 }
@@ -859,6 +1022,7 @@ func NewPopulatedNetwork(r randyEntity, easy bool) *Network {
 		}
 	}
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedEntity(r, 2)
 	}
 	return this
 }
@@ -873,6 +1037,7 @@ func NewPopulatedNetworkInterface(r randyEntity, easy bool) *NetworkInterface {
 		this.Addresses[i] = string(randStringEntity(r))
 	}
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedEntity(r, 4)
 	}
 	return this
 }
@@ -881,6 +1046,7 @@ func NewPopulatedDeregistration(r randyEntity, easy bool) *Deregistration {
 	this := &Deregistration{}
 	this.Handler = string(randStringEntity(r))
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedEntity(r, 2)
 	}
 	return this
 }
@@ -1009,6 +1175,9 @@ func (m *Entity) Size() (n int) {
 			n += 1 + l + sovEntity(uint64(l))
 		}
 	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
 	return n
 }
 
@@ -1041,6 +1210,9 @@ func (m *System) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovEntity(uint64(l))
 	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
 	return n
 }
 
@@ -1052,6 +1224,9 @@ func (m *Network) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovEntity(uint64(l))
 		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -1073,6 +1248,9 @@ func (m *NetworkInterface) Size() (n int) {
 			n += 1 + l + sovEntity(uint64(l))
 		}
 	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
 	return n
 }
 
@@ -1082,6 +1260,9 @@ func (m *Deregistration) Size() (n int) {
 	l = len(m.Handler)
 	if l > 0 {
 		n += 1 + l + sovEntity(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -1492,6 +1673,7 @@ func (m *Entity) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -1746,6 +1928,7 @@ func (m *System) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -1827,6 +2010,7 @@ func (m *Network) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -1964,6 +2148,7 @@ func (m *NetworkInterface) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -2043,6 +2228,7 @@ func (m *Deregistration) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -2157,50 +2343,50 @@ var (
 	ErrIntOverflowEntity   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("entity.proto", fileDescriptorEntity) }
+func init() { proto.RegisterFile("entity.proto", fileDescriptor_entity_ba28f61a92b551bd) }
 
-var fileDescriptorEntity = []byte{
-	// 667 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x54, 0xcd, 0x6e, 0xd3, 0x4a,
-	0x14, 0xee, 0xe4, 0x3f, 0x27, 0x49, 0x6f, 0x3b, 0xed, 0xad, 0xe6, 0xf6, 0xea, 0xda, 0x56, 0xee,
-	0x02, 0x53, 0xd4, 0x54, 0x14, 0x04, 0xeb, 0x9a, 0x82, 0xd4, 0x05, 0x20, 0xa6, 0x88, 0x05, 0x42,
-	0x8a, 0x9c, 0xf8, 0x24, 0xb1, 0x9a, 0x8c, 0xa3, 0x99, 0x49, 0x21, 0x3c, 0x09, 0x6f, 0x00, 0x8f,
-	0xc0, 0x23, 0x74, 0xc9, 0x13, 0x58, 0x10, 0x76, 0x79, 0x00, 0xc4, 0x12, 0x79, 0xec, 0xa4, 0x49,
-	0x61, 0xf7, 0x7d, 0xdf, 0xf9, 0xce, 0xf8, 0xf8, 0xcc, 0x67, 0x43, 0x1d, 0x85, 0x0e, 0xf5, 0xb4,
-	0x35, 0x96, 0x91, 0x8e, 0x68, 0x4d, 0xa1, 0x50, 0x93, 0x96, 0x9e, 0x8e, 0x51, 0xed, 0x1f, 0xf6,
-	0x43, 0x3d, 0x98, 0x74, 0x5a, 0xdd, 0x68, 0x74, 0xd4, 0x8f, 0xfa, 0xd1, 0x91, 0xf1, 0x74, 0x26,
-	0x3d, 0xc3, 0x0c, 0x31, 0x28, 0xed, 0x6d, 0x7e, 0x2c, 0x40, 0xe9, 0xb1, 0x39, 0x8c, 0xee, 0x41,
-	0x2e, 0x0c, 0x18, 0x71, 0x88, 0x5b, 0xf5, 0x4a, 0xb3, 0xd8, 0xce, 0x9d, 0x9d, 0xf2, 0x5c, 0x18,
-	0xd0, 0x5d, 0x28, 0x76, 0x87, 0xbe, 0x52, 0x2c, 0x97, 0x94, 0x78, 0x4a, 0xe8, 0x5d, 0x28, 0xa9,
-	0xa9, 0xd2, 0x38, 0x62, 0x79, 0x87, 0xb8, 0xb5, 0xe3, 0x9d, 0xd6, 0xca, 0x14, 0xad, 0x73, 0x53,
-	0xf2, 0x0a, 0x57, 0xb1, 0xbd, 0xc1, 0x33, 0x23, 0x7d, 0x08, 0x0d, 0x35, 0xe9, 0xa8, 0xae, 0x0c,
-	0xc7, 0x3a, 0x8c, 0x84, 0x62, 0x05, 0x27, 0xef, 0x56, 0xbd, 0xed, 0x79, 0x6c, 0xaf, 0x17, 0xf8,
-	0x3a, 0xa5, 0x07, 0x50, 0x1d, 0xfa, 0x4a, 0xb7, 0x15, 0xa2, 0x60, 0x45, 0x87, 0xb8, 0x79, 0xaf,
-	0x31, 0x8f, 0xed, 0x6b, 0x91, 0x57, 0x12, 0x78, 0x8e, 0x28, 0xa8, 0x05, 0x10, 0xa0, 0xc4, 0x7e,
-	0xa8, 0x34, 0x4a, 0x56, 0x72, 0x88, 0x5b, 0xe1, 0x2b, 0x0a, 0x3d, 0x83, 0xcd, 0x05, 0x93, 0x7e,
-	0x72, 0x3c, 0x2b, 0x9b, 0xf9, 0xff, 0x5d, 0x9b, 0xff, 0x74, 0xcd, 0x92, 0xbd, 0xc7, 0x8d, 0x46,
-	0xea, 0xc1, 0xf6, 0x05, 0xe2, 0xd8, 0x1f, 0x86, 0x97, 0xd8, 0xd6, 0xe1, 0x08, 0xa3, 0x89, 0x66,
-	0x15, 0x87, 0xb8, 0x0d, 0xef, 0xef, 0x79, 0x6c, 0xff, 0x5e, 0xe4, 0x5b, 0x4b, 0xe9, 0x65, 0xaa,
-	0x50, 0x07, 0x6a, 0x28, 0x2e, 0x43, 0x19, 0x89, 0x11, 0x0a, 0xcd, 0xaa, 0x66, 0xc5, 0xab, 0x12,
-	0x6d, 0x42, 0x3d, 0x92, 0x7d, 0x5f, 0x84, 0xef, 0xd3, 0x71, 0xc1, 0x58, 0xd6, 0x34, 0x4a, 0xa1,
-	0x30, 0x51, 0x28, 0x59, 0xcd, 0xd4, 0x0c, 0xa6, 0x0f, 0x60, 0x07, 0xdf, 0x69, 0x14, 0x01, 0x06,
-	0x6d, 0x5f, 0x6b, 0x19, 0x76, 0x26, 0x1a, 0x15, 0xab, 0x3b, 0xc4, 0xad, 0x7b, 0xc5, 0x79, 0x6c,
-	0x93, 0x43, 0x4e, 0x17, 0x8e, 0x93, 0xa5, 0x81, 0xee, 0x41, 0x49, 0x62, 0xe0, 0x77, 0x35, 0x6b,
-	0x24, 0xd7, 0xc3, 0x33, 0xd6, 0xfc, 0x41, 0xa0, 0x94, 0x5e, 0x2b, 0xdd, 0x87, 0xca, 0x20, 0x52,
-	0x5a, 0xf8, 0x23, 0x4c, 0xf3, 0xc2, 0x97, 0x3c, 0x49, 0x51, 0x94, 0x45, 0x25, 0x4d, 0xd1, 0xf3,
-	0x73, 0x9e, 0x8b, 0x54, 0xd2, 0x33, 0x1e, 0xfa, 0xba, 0x17, 0xc9, 0x34, 0x31, 0x55, 0xbe, 0xe4,
-	0xf4, 0x16, 0xfc, 0xb5, 0xc0, 0xed, 0x9e, 0x3f, 0x0a, 0x87, 0x53, 0x56, 0x30, 0x96, 0xcd, 0x85,
-	0xfc, 0xc4, 0xa8, 0xf4, 0x36, 0x6c, 0x2d, 0x8d, 0x97, 0x28, 0x55, 0xb2, 0x8f, 0xa2, 0x71, 0x2e,
-	0x0f, 0x78, 0x95, 0xca, 0xf4, 0x3e, 0x94, 0x05, 0xea, 0xb7, 0x91, 0xbc, 0x30, 0x21, 0xa8, 0x1d,
-	0xef, 0xae, 0x5d, 0xf0, 0xb3, 0xb4, 0x96, 0xdd, 0xec, 0xc2, 0x9a, 0x2c, 0xd2, 0x97, 0xdd, 0x81,
-	0xc9, 0x44, 0x95, 0x1b, 0xdc, 0x7c, 0x03, 0xe5, 0xcc, 0x4d, 0x5f, 0x00, 0x84, 0x42, 0xa3, 0xec,
-	0xf9, 0x5d, 0x54, 0x8c, 0x38, 0x79, 0xb7, 0x76, 0xfc, 0xdf, 0x9f, 0xce, 0x3d, 0x5b, 0xb8, 0x3c,
-	0x9a, 0x3c, 0x60, 0x1e, 0xdb, 0x2b, 0x8d, 0x7c, 0x05, 0x37, 0x05, 0x6c, 0xdd, 0xec, 0x49, 0xa6,
-	0x58, 0xd9, 0xad, 0xc1, 0xf4, 0x1f, 0xc8, 0x8f, 0xfc, 0x6e, 0xb6, 0xd8, 0xf2, 0x2c, 0xb6, 0xf3,
-	0x4f, 0x4f, 0x1e, 0xf1, 0x44, 0xa3, 0x77, 0xa0, 0xea, 0x07, 0x81, 0x44, 0xa5, 0x50, 0xb1, 0xbc,
-	0xf9, 0xa6, 0xcc, 0xe7, 0xb1, 0x14, 0xf9, 0x35, 0x6c, 0x1e, 0xc0, 0xe6, 0x7a, 0xb8, 0x29, 0x83,
-	0xf2, 0xc0, 0x17, 0xc1, 0x10, 0x65, 0xf6, 0xc0, 0x05, 0xf5, 0xfe, 0xff, 0xf9, 0xcd, 0x22, 0x9f,
-	0x66, 0x16, 0xf9, 0x3c, 0xb3, 0xc8, 0xd5, 0xcc, 0x22, 0x5f, 0x66, 0x16, 0xf9, 0x3a, 0xb3, 0xc8,
-	0x87, 0xef, 0xd6, 0xc6, 0xeb, 0xa2, 0x79, 0xe3, 0x4e, 0xc9, 0xfc, 0x48, 0xee, 0xfd, 0x0a, 0x00,
-	0x00, 0xff, 0xff, 0x47, 0x6a, 0x9b, 0xee, 0x94, 0x04, 0x00, 0x00,
+var fileDescriptor_entity_ba28f61a92b551bd = []byte{
+	// 670 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x54, 0xcd, 0x6e, 0xd3, 0x4c,
+	0x14, 0xed, 0xe4, 0x3f, 0x37, 0x3f, 0x5f, 0x3b, 0xed, 0x57, 0x0d, 0x45, 0xc4, 0x56, 0x58, 0x60,
+	0x8a, 0x9a, 0x8a, 0x82, 0x60, 0x5d, 0x53, 0x90, 0xba, 0x00, 0xc4, 0x14, 0xb1, 0x40, 0x48, 0x91,
+	0x13, 0xdf, 0x24, 0x56, 0x93, 0x71, 0x34, 0x33, 0x29, 0x84, 0x27, 0xe1, 0x11, 0x78, 0x03, 0x78,
+	0x84, 0x2e, 0x79, 0x02, 0x0b, 0xc2, 0x2e, 0x0f, 0x80, 0x58, 0x22, 0x8f, 0x9d, 0x34, 0x29, 0xec,
+	0xce, 0x39, 0xf7, 0xdc, 0xf9, 0xb9, 0x73, 0x6c, 0xa8, 0xa2, 0xd0, 0x81, 0x9e, 0xb6, 0xc6, 0x32,
+	0xd4, 0x21, 0xad, 0x28, 0x14, 0x6a, 0xd2, 0xd2, 0xd3, 0x31, 0xaa, 0xbd, 0x83, 0x7e, 0xa0, 0x07,
+	0x93, 0x4e, 0xab, 0x1b, 0x8e, 0x0e, 0xfb, 0x61, 0x3f, 0x3c, 0x34, 0x9e, 0xce, 0xa4, 0x67, 0x98,
+	0x21, 0x06, 0x25, 0xbd, 0xcd, 0x2f, 0x39, 0x28, 0x3c, 0x35, 0x8b, 0xd1, 0x5d, 0xc8, 0x04, 0x3e,
+	0x23, 0x36, 0x71, 0xca, 0x6e, 0x61, 0x16, 0x59, 0x99, 0xd3, 0x13, 0x9e, 0x09, 0x7c, 0xba, 0x03,
+	0xf9, 0xee, 0xd0, 0x53, 0x8a, 0x65, 0xe2, 0x12, 0x4f, 0x08, 0xbd, 0x0f, 0x05, 0x35, 0x55, 0x1a,
+	0x47, 0x2c, 0x6b, 0x13, 0xa7, 0x72, 0xb4, 0xdd, 0x5a, 0x39, 0x45, 0xeb, 0xcc, 0x94, 0xdc, 0xdc,
+	0x65, 0x64, 0x6d, 0xf0, 0xd4, 0x48, 0x1f, 0x43, 0x4d, 0x4d, 0x3a, 0xaa, 0x2b, 0x83, 0xb1, 0x0e,
+	0x42, 0xa1, 0x58, 0xce, 0xce, 0x3a, 0x65, 0x77, 0x6b, 0x1e, 0x59, 0xeb, 0x05, 0xbe, 0x4e, 0xe9,
+	0x3e, 0x94, 0x87, 0x9e, 0xd2, 0x6d, 0x85, 0x28, 0x58, 0xde, 0x26, 0x4e, 0xd6, 0xad, 0xcd, 0x23,
+	0xeb, 0x4a, 0xe4, 0xa5, 0x18, 0x9e, 0x21, 0x0a, 0xda, 0x02, 0xf0, 0x51, 0x62, 0x3f, 0x50, 0x1a,
+	0x25, 0x2b, 0xd8, 0xc4, 0x29, 0xb9, 0xf5, 0x79, 0x64, 0xad, 0xa8, 0x7c, 0x05, 0xd3, 0x53, 0xa8,
+	0x2f, 0x98, 0xf4, 0xe2, 0xed, 0x58, 0xd1, 0xdc, 0xe7, 0xe6, 0xda, 0x7d, 0x4e, 0xd6, 0x2c, 0xe9,
+	0xbd, 0xae, 0x35, 0x52, 0x17, 0xb6, 0xce, 0x11, 0xc7, 0xde, 0x30, 0xb8, 0xc0, 0xb6, 0x0e, 0x46,
+	0x18, 0x4e, 0x34, 0x2b, 0xd9, 0xc4, 0xa9, 0xb9, 0xff, 0xcf, 0x23, 0xeb, 0xef, 0x22, 0xdf, 0x5c,
+	0x4a, 0xaf, 0x13, 0x85, 0xda, 0x50, 0x41, 0x71, 0x11, 0xc8, 0x50, 0x8c, 0x50, 0x68, 0x56, 0x36,
+	0x23, 0x5f, 0x95, 0x68, 0x13, 0xaa, 0xa1, 0xec, 0x7b, 0x22, 0xf8, 0x98, 0x1c, 0x17, 0x8c, 0x65,
+	0x4d, 0xa3, 0x14, 0x72, 0x13, 0x85, 0x92, 0x55, 0x4c, 0xcd, 0x60, 0xfa, 0x08, 0xb6, 0xf1, 0x83,
+	0x46, 0xe1, 0xa3, 0xdf, 0xf6, 0xb4, 0x96, 0x41, 0x67, 0xa2, 0x51, 0xb1, 0xaa, 0x4d, 0x9c, 0xaa,
+	0x9b, 0x9f, 0x47, 0x16, 0x39, 0xe0, 0x74, 0xe1, 0x38, 0x5e, 0x1a, 0xe8, 0x2e, 0x14, 0x24, 0xfa,
+	0x5e, 0x57, 0xb3, 0x5a, 0xfc, 0x5c, 0x3c, 0x65, 0xcd, 0x5f, 0x04, 0x0a, 0xc9, 0x33, 0xd3, 0x3d,
+	0x28, 0x0d, 0x42, 0xa5, 0x85, 0x37, 0xc2, 0x24, 0x3f, 0x7c, 0xc9, 0xe3, 0x54, 0x85, 0x69, 0x74,
+	0x92, 0x54, 0xbd, 0x3c, 0xe3, 0x99, 0x50, 0xc5, 0x3d, 0xe3, 0xa1, 0xa7, 0x7b, 0xa1, 0x4c, 0x12,
+	0x54, 0xe6, 0x4b, 0x4e, 0xef, 0xc0, 0x7f, 0x0b, 0xdc, 0xee, 0x79, 0xa3, 0x60, 0x38, 0x65, 0x39,
+	0x63, 0xa9, 0x2f, 0xe4, 0x67, 0x46, 0xa5, 0x77, 0x61, 0x73, 0x69, 0xbc, 0x40, 0xa9, 0xe2, 0x79,
+	0xe4, 0x8d, 0x73, 0xb9, 0xc0, 0x9b, 0x44, 0xa6, 0x0f, 0xa1, 0x28, 0x50, 0xbf, 0x0f, 0xe5, 0xb9,
+	0x09, 0x45, 0xe5, 0x68, 0x67, 0xed, 0x81, 0x5f, 0x24, 0xb5, 0xf4, 0x65, 0x17, 0xd6, 0x78, 0x90,
+	0x9e, 0xec, 0x0e, 0x4c, 0x26, 0xca, 0xdc, 0xe0, 0xe6, 0x3b, 0x28, 0xa6, 0x6e, 0xfa, 0x0a, 0x20,
+	0x10, 0x1a, 0x65, 0xcf, 0xeb, 0xa2, 0x62, 0xc4, 0xce, 0x3a, 0x95, 0xa3, 0x5b, 0xff, 0x5a, 0xf7,
+	0x74, 0xe1, 0x72, 0x69, 0xbc, 0x41, 0x9c, 0xc7, 0xab, 0x46, 0xbe, 0x82, 0x9b, 0x02, 0x36, 0xaf,
+	0xf7, 0xc4, 0xa7, 0x58, 0x99, 0xad, 0xc1, 0xf4, 0x06, 0x64, 0x47, 0x5e, 0x37, 0x1d, 0x6c, 0x71,
+	0x16, 0x59, 0xd9, 0xe7, 0xc7, 0x4f, 0x78, 0xac, 0xd1, 0x7b, 0x50, 0xf6, 0x7c, 0x5f, 0xa2, 0x52,
+	0xa8, 0x58, 0xd6, 0x7c, 0x63, 0xe6, 0x73, 0x59, 0x8a, 0xfc, 0x0a, 0x36, 0xf7, 0xa1, 0xbe, 0x1e,
+	0x6e, 0xca, 0xa0, 0x38, 0xf0, 0x84, 0x3f, 0x44, 0x99, 0x6e, 0xb8, 0xa0, 0xee, 0xed, 0xdf, 0x3f,
+	0x1a, 0xe4, 0xf3, 0xac, 0x41, 0xbe, 0xce, 0x1a, 0xe4, 0x72, 0xd6, 0x20, 0xdf, 0x66, 0x0d, 0xf2,
+	0x7d, 0xd6, 0x20, 0x9f, 0x7e, 0x36, 0x36, 0xde, 0xe6, 0xcd, 0x8d, 0x3b, 0x05, 0xf3, 0x63, 0x79,
+	0xf0, 0x27, 0x00, 0x00, 0xff, 0xff, 0xe6, 0xe2, 0x1b, 0x4f, 0xa4, 0x04, 0x00, 0x00,
 }

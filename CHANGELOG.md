@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.7] - 2018-09-05
+### Added
+- `Gopkg.lock` and `Gopkg.toml` files
+
+### Changed
+- Bumped sensu-go version
+
 ## [v1.6] - 2018-08-27
 ### Added
 - Added `grafana-config.json` as a grafana dashboard configuration for the example scripts

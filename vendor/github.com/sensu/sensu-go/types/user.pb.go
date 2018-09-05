@@ -8,6 +8,8 @@ import fmt "fmt"
 import math "math"
 import _ "github.com/gogo/protobuf/gogoproto"
 
+import bytes "bytes"
+
 import io "io"
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -15,18 +17,55 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 // User describes an authenticated user
 type User struct {
-	Username string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
-	Password string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	Roles    []string `protobuf:"bytes,3,rep,name=roles" json:"roles,omitempty"`
-	Disabled bool     `protobuf:"varint,4,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Roles                []string `protobuf:"bytes,3,rep,name=roles" json:"roles,omitempty"`
+	Disabled             bool     `protobuf:"varint,4,opt,name=disabled,proto3" json:"disabled"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *User) Reset()                    { *m = User{} }
-func (m *User) String() string            { return proto.CompactTextString(m) }
-func (*User) ProtoMessage()               {}
-func (*User) Descriptor() ([]byte, []int) { return fileDescriptorUser, []int{0} }
+func (m *User) Reset()         { *m = User{} }
+func (m *User) String() string { return proto.CompactTextString(m) }
+func (*User) ProtoMessage()    {}
+func (*User) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9b813aa1a9a38e4e, []int{0}
+}
+func (m *User) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *User) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_User.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalTo(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (dst *User) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_User.Merge(dst, src)
+}
+func (m *User) XXX_Size() int {
+	return m.Size()
+}
+func (m *User) XXX_DiscardUnknown() {
+	xxx_messageInfo_User.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_User proto.InternalMessageInfo
 
 func (m *User) GetUsername() string {
 	if m != nil {
@@ -61,10 +100,7 @@ func init() {
 }
 func (this *User) Equal(that interface{}) bool {
 	if that == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	}
 
 	that1, ok := that.(*User)
@@ -77,10 +113,7 @@ func (this *User) Equal(that interface{}) bool {
 		}
 	}
 	if that1 == nil {
-		if this == nil {
-			return true
-		}
-		return false
+		return this == nil
 	} else if this == nil {
 		return false
 	}
@@ -99,6 +132,9 @@ func (this *User) Equal(that interface{}) bool {
 		}
 	}
 	if this.Disabled != that1.Disabled {
+		return false
+	}
+	if !bytes.Equal(this.XXX_unrecognized, that1.XXX_unrecognized) {
 		return false
 	}
 	return true
@@ -155,6 +191,9 @@ func (m *User) MarshalTo(dAtA []byte) (int, error) {
 		}
 		i++
 	}
+	if m.XXX_unrecognized != nil {
+		i += copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	return i, nil
 }
 
@@ -178,6 +217,7 @@ func NewPopulatedUser(r randyUser, easy bool) *User {
 	}
 	this.Disabled = bool(bool(r.Intn(2) == 0))
 	if !easy && r.Intn(10) != 0 {
+		this.XXX_unrecognized = randUnrecognizedUser(r, 5)
 	}
 	return this
 }
@@ -273,6 +313,9 @@ func (m *User) Size() (n int) {
 	}
 	if m.Disabled {
 		n += 2
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -438,6 +481,7 @@ func (m *User) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -552,21 +596,22 @@ var (
 	ErrIntOverflowUser   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("user.proto", fileDescriptorUser) }
+func init() { proto.RegisterFile("user.proto", fileDescriptor_user_9b813aa1a9a38e4e) }
 
-var fileDescriptorUser = []byte{
-	// 199 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_user_9b813aa1a9a38e4e = []byte{
+	// 209 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2a, 0x2d, 0x4e, 0x2d,
 	0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x2e, 0x4e, 0xcd, 0x2b, 0x2e, 0xd5, 0x2b, 0xa9,
 	0x2c, 0x48, 0x2d, 0x96, 0xd2, 0x4d, 0xcf, 0x2c, 0xc9, 0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5,
 	0x4f, 0xcf, 0x4f, 0xcf, 0xd7, 0x07, 0xab, 0x49, 0x2a, 0x4d, 0x03, 0xf3, 0xc0, 0x1c, 0x30, 0x0b,
-	0xa2, 0x57, 0xa9, 0x80, 0x8b, 0x25, 0xb4, 0x38, 0xb5, 0x48, 0x48, 0x8a, 0x8b, 0x03, 0x64, 0x62,
+	0xa2, 0x57, 0xa9, 0x8e, 0x8b, 0x25, 0xb4, 0x38, 0xb5, 0x48, 0x48, 0x8a, 0x8b, 0x03, 0x64, 0x62,
 	0x5e, 0x62, 0x6e, 0xaa, 0x04, 0xa3, 0x02, 0xa3, 0x06, 0x67, 0x10, 0x9c, 0x0f, 0x92, 0x2b, 0x48,
 	0x2c, 0x2e, 0x2e, 0xcf, 0x2f, 0x4a, 0x91, 0x60, 0x82, 0xc8, 0xc1, 0xf8, 0x42, 0x22, 0x5c, 0xac,
-	0x45, 0xf9, 0x39, 0xa9, 0xc5, 0x12, 0xcc, 0x0a, 0xcc, 0x1a, 0x9c, 0x41, 0x10, 0x0e, 0x48, 0x47,
-	0x4a, 0x66, 0x71, 0x62, 0x52, 0x4e, 0x6a, 0x8a, 0x04, 0x8b, 0x02, 0xa3, 0x06, 0x47, 0x10, 0x9c,
-	0xef, 0xa4, 0xfc, 0xe3, 0xa1, 0x1c, 0xe3, 0x8a, 0x47, 0x72, 0x8c, 0x3b, 0x1e, 0xc9, 0x31, 0x9e,
-	0x78, 0x24, 0xc7, 0x78, 0xe1, 0x91, 0x1c, 0xe3, 0x83, 0x47, 0x72, 0x8c, 0x33, 0x1e, 0xcb, 0x31,
-	0x44, 0xb1, 0x82, 0x7d, 0x91, 0xc4, 0x06, 0x76, 0x9d, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff, 0x95,
-	0xcd, 0x48, 0xde, 0xe7, 0x00, 0x00, 0x00,
+	0x45, 0xf9, 0x39, 0xa9, 0xc5, 0x12, 0xcc, 0x0a, 0xcc, 0x1a, 0x9c, 0x41, 0x10, 0x8e, 0x90, 0x06,
+	0x17, 0x47, 0x4a, 0x66, 0x71, 0x62, 0x52, 0x4e, 0x6a, 0x8a, 0x04, 0x8b, 0x02, 0xa3, 0x06, 0x87,
+	0x13, 0xcf, 0xab, 0x7b, 0xf2, 0x70, 0xb1, 0x20, 0x38, 0xcb, 0x49, 0xf9, 0xc7, 0x43, 0x39, 0xc6,
+	0x15, 0x8f, 0xe4, 0x18, 0x77, 0x3c, 0x92, 0x63, 0x3c, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23, 0x39,
+	0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x67, 0x3c, 0x96, 0x63, 0x88, 0x62, 0x05, 0xfb, 0x29, 0x89, 0x0d,
+	0xec, 0x56, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x63, 0x80, 0xad, 0xd0, 0xf5, 0x00, 0x00,
+	0x00,
 }

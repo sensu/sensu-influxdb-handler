@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"net/url"
 )
 
 const (
@@ -26,6 +27,9 @@ const (
 
 	// RuleTypeCheck access control for check objects
 	RuleTypeCheck = "checks"
+
+	// RuleTypeCluster access control for cluster management
+	RuleTypeCluster = "cluster"
 
 	// RuleTypeEntity access control for entity objects
 	RuleTypeEntity = "entities"
@@ -71,6 +75,25 @@ var (
 		RulePermRead,
 		RulePermUpdate,
 		RulePermDelete,
+	}
+
+	// AllTypes specifies all possible types
+	AllTypes = []string{
+		RuleTypeAll,
+		RuleTypeAsset,
+		RuleTypeCheck,
+		RuleTypeEntity,
+		RuleTypeEnvironment,
+		RuleTypeEvent,
+		RuleTypeEventFilter,
+		RuleTypeExtension,
+		RuleTypeHandler,
+		RuleTypeHook,
+		RuleTypeMutator,
+		RuleTypeOrganization,
+		RuleTypeRole,
+		RuleTypeSilenced,
+		RuleTypeUser,
 	}
 )
 
@@ -132,6 +155,11 @@ func (r *Role) Validate() error {
 	}
 
 	return nil
+}
+
+// URIPath returns the path component of a Role URI.
+func (r *Role) URIPath() string {
+	return fmt.Sprintf("/rbac/roles/%s", url.PathEscape(r.Name))
 }
 
 //

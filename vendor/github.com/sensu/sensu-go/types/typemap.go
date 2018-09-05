@@ -2,7 +2,10 @@ package types
 
 // automatically generated file, do not edit!
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 // typeMap is used to dynamically look up data types from strings.
 var typeMap = map[string]interface{}{
@@ -22,6 +25,8 @@ var typeMap = map[string]interface{}{
 	"check_request":          &CheckRequest{},
 	"Claims":                 &Claims{},
 	"claims":                 &Claims{},
+	"ClusterHealth":          &ClusterHealth{},
+	"cluster_health":         &ClusterHealth{},
 	"Deregistration":         &Deregistration{},
 	"deregistration":         &Deregistration{},
 	"Entity":                 &Entity{},
@@ -96,9 +101,14 @@ func ResolveResource(name string) (Resource, error) {
 	if !ok {
 		return nil, fmt.Errorf("type could not be found: %q", name)
 	}
-	r, ok := t.(Resource)
-	if !ok {
+	if _, ok := t.(Resource); !ok {
 		return nil, fmt.Errorf("%q is not a Resource", name)
 	}
-	return r, nil
+	return newResource(t), nil
+}
+
+// Make a new Resource to avoid aliasing problems with ResolveResource.
+// don't use this function. no, seriously.
+func newResource(r interface{}) Resource {
+	return reflect.New(reflect.ValueOf(r).Elem().Type()).Interface().(Resource)
 }
