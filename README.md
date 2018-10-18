@@ -8,6 +8,8 @@ pass through the event pipeline, allowing Sensu to deliver the metrics to the
 configured metric event handlers. This InfluxDB handler will allow you to
 store, instrument, and visualize the metric data from Sensu.
 
+Check out [The Sensu Blog][5] for a step by step guide!
+
 ## Installation
 
 Download the latest version of the sensu-influxdb-handler from [releases][4],
@@ -65,3 +67,4 @@ Flags:
 [2]: https://github.com/influxdata/influxdb
 [3]: https://docs.sensu.io/sensu-core/2.0/reference/handlers/#how-do-sensu-handlers-work
 [4]: https://github.com/nikkiki/sensu-influxdb-handler/releases
+[5]: https://blog.sensu.io/check-output-metric-extraction-with-influxdb-grafana
