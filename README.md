@@ -63,8 +63,32 @@ Flags:
   -u, --username string   the username for the given db
 ```
 
+## Contributing
+
+nikkiki/sensu-influxdb-handler requires the Developer Certificate of Origin (DCO)
+process to be followed.
+
+The DCO is an attestation attached to every contribution made by every
+developer. In the commit message of the contribution, the developer
+simply adds a Signed-off-by statement and thereby agrees to the [DCO][6].
+
+```
+Author: Nikki Attea <nikki@sensu.io>
+
+ Committer: Nikki Attea <nikki@sensu.io>
+
+   Winter is coming.
+
+   Signed-off-by: Nikki Attea <nikki@sensu.io>
+```
+
+Git makes this easy with git commit --signoff! The DCO text can either be
+manually added to your commit body, or you can add either -s or --signoff
+to your usual git commit commands.
+
 [1]: https://github.com/sensu/sensu-go
 [2]: https://github.com/influxdata/influxdb
 [3]: https://docs.sensu.io/sensu-core/2.0/reference/handlers/#how-do-sensu-handlers-work
 [4]: https://github.com/nikkiki/sensu-influxdb-handler/releases
 [5]: https://blog.sensu.io/check-output-metric-extraction-with-influxdb-grafana
+[6]: http://developercertificate.org/
