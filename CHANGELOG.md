@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v1.8] - 2018-10-23
+### Fixed
+- Fixed a bug where the handler would only log errors, rather than printing to stderr
+and returning a failure exit code.
+
 ## [v1.7] - 2018-09-05
 ### Added
 - `Gopkg.lock` and `Gopkg.toml` files

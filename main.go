@@ -2,10 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -27,7 +25,8 @@ var (
 func main() {
 	rootCmd := configureRootCommand()
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err.Error())
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -73,7 +72,7 @@ func configureRootCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) error {
 	if len(args) != 0 {
 		_ = cmd.Help()
-		return errors.New("invalid argument(s) received")
+		return fmt.Errorf("invalid argument(s) received")
 	}
 
 	if stdin == nil {
@@ -82,17 +81,17 @@ func run(cmd *cobra.Command, args []string) error {
 
 	eventJSON, err := ioutil.ReadAll(stdin)
 	if err != nil {
-		return fmt.Errorf("failed to read stdin: %s", err.Error())
+		return fmt.Errorf("failed to read stdin: %s", err)
 	}
 
 	event := &types.Event{}
 	err = json.Unmarshal(eventJSON, event)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal stdin data: %s", err.Error())
+		return fmt.Errorf("failed to unmarshal stdin data: %s", err)
 	}
 
 	if err = event.Validate(); err != nil {
-		return fmt.Errorf("failed to validate event: %s", err.Error())
+		return fmt.Errorf("failed to validate event: %s", err)
 	}
 
 	if !event.HasMetrics() {
