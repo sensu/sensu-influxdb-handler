@@ -1,5 +1,5 @@
 # Sensu InfluxDB Handler
-TravisCI: [![TravisCI Build Status](https://travis-ci.org/nikkiki/sensu-influxdb-handler.svg?branch=master)](https://travis-ci.org/nikkiki/sensu-influxdb-handler)
+TravisCI: [![TravisCI Build Status](https://travis-ci.org/sensu/sensu-influxdb-handler.svg?branch=master)](https://travis-ci.org/sensu/sensu-influxdb-handler)
 
 The Sensu InfluxDB Handler is a [Sensu Event Handler][3] that sends metrics to
 the time series database [InfluxDB][2]. [Sensu][1] can collect metrics using
@@ -8,7 +8,7 @@ pass through the event pipeline, allowing Sensu to deliver the metrics to the
 configured metric event handlers. This InfluxDB handler will allow you to
 store, instrument, and visualize the metric data from Sensu.
 
-Check out [The Sensu Blog][5] for a step by step guide!
+Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 
 ## Installation
 
@@ -65,30 +65,11 @@ Flags:
 
 ## Contributing
 
-nikkiki/sensu-influxdb-handler requires the Developer Certificate of Origin (DCO)
-process to be followed.
-
-The DCO is an attestation attached to every contribution made by every
-developer. In the commit message of the contribution, the developer
-simply adds a Signed-off-by statement and thereby agrees to the [DCO][6].
-
-```
-Author: Nikki Attea <nikki@sensu.io>
-
- Committer: Nikki Attea <nikki@sensu.io>
-
-   Winter is coming.
-
-   Signed-off-by: Nikki Attea <nikki@sensu.io>
-```
-
-Git makes this easy with git commit --signoff! The DCO text can either be
-manually added to your commit body, or you can add either -s or --signoff
-to your usual git commit commands.
+See https://github.com/sensu/sensu-go/blob/master/CONTRIBUTING.md
 
 [1]: https://github.com/sensu/sensu-go
 [2]: https://github.com/influxdata/influxdb
 [3]: https://docs.sensu.io/sensu-core/2.0/reference/handlers/#how-do-sensu-handlers-work
-[4]: https://github.com/nikkiki/sensu-influxdb-handler/releases
+[4]: https://github.com/sensu/sensu-influxdb-handler/releases
 [5]: https://blog.sensu.io/check-output-metric-extraction-with-influxdb-grafana
-[6]: http://developercertificate.org/
+[6]: https://docs.sensu.io/sensu-core/2.0/guides/influx-db-metric-handler/
