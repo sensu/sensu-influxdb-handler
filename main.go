@@ -141,7 +141,7 @@ func sendMetrics(event *types.Event) error {
 		}
 		timestamp := time.Unix(t, 0)
 		tags := make(map[string]string)
-		tags["sensu_entity_id"] = event.Entity.ID
+		tags["sensu_entity_name"] = event.Entity.Name
 		for _, tag := range point.Tags {
 			tags[tag.Name] = tag.Value
 		}
