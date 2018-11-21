@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v2.0] - 2018-11-21
+### Breaking Changes
+- Updated sensu-go version to beta-8 and fixed some breaking changes that
+were introduced (`Entity.ID` -> `Entity.Name`).
+- Changed tag `sensu_entity_id` to `sensu_entity_name` for consistency.
+
+### Removed
+- Removed the vendor directory. Dependencies are still managed with Gopkg.toml.
+
 ## [v1.8] - 2018-10-23
 ### Fixed
 - Fixed a bug where the handler would only log errors, rather than printing to stderr
