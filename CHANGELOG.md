@@ -6,9 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [v3.0] - 2018-11-30
+## [3.0.0] - 2018-11-30
 ### Breaking Changes
 - Updated sensu-go version to GA RC SHA.
+- Updated the goreleaser file so that the handler is packaged as a Sensu
+Go compatible asset.
 
 ## [v2.0] - 2018-11-21
 ### Breaking Changes
