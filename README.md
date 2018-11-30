@@ -22,31 +22,55 @@ go build -o /usr/local/bin/sensu-influxdb-handler main.go
 
 ## Configuration
 
-Example Sensu 2.x handler definition:
-```
+Example Sensu Go handler definition:
+
+```json
 {
-  "name": "influx-db",
-  "type": "pipe",
-  "command": "sensu-influxdb-handler --addr 'http://123.4.5.6:8086' --username 'foo' --password 'bar' --db-name 'myDB'"
+    "api_version": "core/v2",
+    "type": "Handler",
+    "metadata": {
+        "namespace": "default",
+        "name": "influxdb"
+    },
+    "spec": {
+        "type": "pipe",
+        "command": "sensu-influxdb-handler -a 'http://influxdb.default.svc.cluster.local:8086' -d sensu -u sensu -p password",
+        "timeout": 10,
+        "filters": [
+            "has_metrics"
+        ]
+    }
 }
 ```
 
-Example Sensu 2.x check definition:
-```
+Example Sensu Go check definition:
+
+```json
 {
-  "name": "collect-metrics",
-  "command": "collect.sh",
-  "interval": 10,
-  "subscriptions": [
-    "system"
-  ],
-  "output_metric_format": "graphite_plaintext",
-  "output_metric_handlers": ["influx-db"]
+    "api_version": "core/v2",
+    "type": "CheckConfig",
+    "metadata": {
+        "namespace": "default",
+        "name": "dummy-app-prometheus"
+    },
+    "spec": {
+        "command": "sensu-prometheus-collector -exporter-url http://localhost:8080/metrics",
+        "subscriptions":[
+            "dummy"
+        ],
+        "publish": true,
+        "interval": 10,
+        "output_metric_format": "influxdb_line",
+        "output_metric_handlers": [
+            "influxdb"
+        ]
+    }
 }
 ```
-That's right, you can collect different types of metrics (ex. Graphite), Sensu
-will extract and transform them, and this handler will populate them into your
-InfluxDB.
+
+That's right, you can collect different types of metrics (ex. Influx,
+Graphite, OpenTSDB, Nagios, etc.), Sensu will extract and transform
+them, and this handler will populate them into your InfluxDB.
 
 ## Usage Examples
 
@@ -69,7 +93,7 @@ See https://github.com/sensu/sensu-go/blob/master/CONTRIBUTING.md
 
 [1]: https://github.com/sensu/sensu-go
 [2]: https://github.com/influxdata/influxdb
-[3]: https://docs.sensu.io/sensu-core/2.0/reference/handlers/#how-do-sensu-handlers-work
+[3]: https://docs.sensu.io/sensu-go/5.0/reference/handlers/#how-do-sensu-handlers-work
 [4]: https://github.com/sensu/sensu-influxdb-handler/releases
 [5]: https://blog.sensu.io/check-output-metric-extraction-with-influxdb-grafana
-[6]: https://docs.sensu.io/sensu-core/2.0/guides/influx-db-metric-handler/
+[6]: https://docs.sensu.io/sensu-go/5.0/guides/influx-db-metric-handler/
