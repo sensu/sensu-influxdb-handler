@@ -80,9 +80,9 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string       the address of the influx-db server, should be of the form 'http://host:port'
-  -d, --db-name string    the influx-db to send metrics to
-  -h, --help              help for handler-influx-db
+  -a, --addr string       the address of the influxdb server, should be of the form 'http://host:port'
+  -d, --db-name string    the influxdb to send metrics to
+  -h, --help              help for sensu-influxdb-handler
   -p, --password string   the password for the given db
   -u, --username string   the username for the given db
 ```

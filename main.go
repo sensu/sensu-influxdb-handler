@@ -33,7 +33,7 @@ func main() {
 func configureRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sensu-influxdb-handler",
-		Short: "an influx-db handler built for use with sensu",
+		Short: "an influxdb handler built for use with sensu",
 		RunE:  run,
 	}
 
@@ -41,13 +41,13 @@ func configureRootCommand() *cobra.Command {
 		"addr",
 		"a",
 		"",
-		"the address of the influx-db server, should be of the form 'http://host:port'")
+		"the address of the influxdb server, should be of the form 'http://host:port'")
 
 	cmd.Flags().StringVarP(&dbName,
 		"db-name",
 		"d",
 		"",
-		"the influx-db to send metrics to")
+		"the influxdb to send metrics to")
 
 	cmd.Flags().StringVarP(&username,
 		"username",
