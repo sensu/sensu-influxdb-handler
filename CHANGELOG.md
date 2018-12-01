@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.1] - 2018-11-30
+### Changes
+- Updated the goreleaser file to include env and main in the same
+build, hopefully stopping double builds.
+
 ## [3.0.0] - 2018-11-30
 ### Breaking Changes
 - Updated sensu-go version to GA RC SHA.
