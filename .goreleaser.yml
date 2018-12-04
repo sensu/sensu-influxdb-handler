@@ -46,6 +46,11 @@ builds:
       - goos: linux
         goarch: mips64le
 
+checksum:
+  # You can change the name of the checksums file.
+  # Default is `{{ .ProjectName }}_{{ .Version }}_checksums.txt`.
+  name_template: "{{ .ProjectName }}_{{ .Version }}_sha256-checksums.txt"
+
 archive:
   format: tar.gz
   files:
