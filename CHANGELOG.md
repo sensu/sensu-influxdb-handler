@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.2] - 2018-12-05
+### Changes
+- Travis post-deploy script generates a sha512 for packages to be sensu asset compatible.
+
 ## [3.0.1] - 2018-11-30
 ### Changes
 - Updated the goreleaser file to include env and main in the same
