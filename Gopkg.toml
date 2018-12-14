@@ -33,6 +33,10 @@
   name = "github.com/spf13/cobra"
   version = "0.0.3"
 
+[[constraint]]
+  name = "github.com/influxdata/influxdb"
+  version = "v1.7.2"
+
 [prune]
   go-tests = true
   unused-packages = true

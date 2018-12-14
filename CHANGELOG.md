@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.1.0] - 2018-12-14
+### Added
+- Adds `--precision` flag (still defaults to 's').
+- Adds `--insecure-skip-verify` flag (still defaults to false).
+
 ## [3.0.2] - 2018-12-05
 ### Changes
 - Travis post-deploy script generates a sha512 for packages to be sensu asset compatible.
