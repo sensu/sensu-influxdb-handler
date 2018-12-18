@@ -73,7 +73,7 @@ func configureRootCommand() *cobra.Command {
 		"insecure-skip-verify",
 		"i",
 		false,
-		"if true, the influx client skips https certification validation")
+		"if true, the influx client skips https certificate verification")
 
 	_ = cmd.MarkFlagRequired("addr")
 	_ = cmd.MarkFlagRequired("db-name")
