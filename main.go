@@ -15,11 +15,13 @@ import (
 )
 
 var (
-	addr     string
-	dbName   string
-	username string
-	password string
-	stdin    *os.File
+	addr               string
+	dbName             string
+	username           string
+	password           string
+	precision          string
+	insecureSkipVerify bool
+	stdin              *os.File
 )
 
 func main() {
@@ -60,6 +62,18 @@ func configureRootCommand() *cobra.Command {
 		"p",
 		"",
 		"the password for the given db")
+
+	cmd.Flags().StringVarP(&precision,
+		"precision",
+		"",
+		"s",
+		"the precision value of the metric")
+
+	cmd.Flags().BoolVarP(&insecureSkipVerify,
+		"insecure-skip-verify",
+		"i",
+		false,
+		"if true, the influx client skips https certificate verification")
 
 	_ = cmd.MarkFlagRequired("addr")
 	_ = cmd.MarkFlagRequired("db-name")
@@ -104,9 +118,10 @@ func run(cmd *cobra.Command, args []string) error {
 func sendMetrics(event *types.Event) error {
 	var pt *client.Point
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     addr,
-		Username: username,
-		Password: password,
+		Addr:               addr,
+		Username:           username,
+		Password:           password,
+		InsecureSkipVerify: insecureSkipVerify,
 	})
 	if err != nil {
 		return err
@@ -115,7 +130,7 @@ func sendMetrics(event *types.Event) error {
 
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  dbName,
-		Precision: "s",
+		Precision: precision,
 	})
 	if err != nil {
 		return err
