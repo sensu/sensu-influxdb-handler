@@ -34,8 +34,13 @@ Example Sensu Go handler definition:
     },
     "spec": {
         "type": "pipe",
-        "command": "sensu-influxdb-handler -a 'http://influxdb.default.svc.cluster.local:8086' -d sensu -u sensu -p password",
+        "command": "sensu-influxdb-handler -d sensu",
         "timeout": 10,
+        "env_vars": [
+            "INFLUXDB_ADDR=http://influxdb.default.svc.cluster.local:8086",
+            "INFLUXDB_USER=sensu",
+            "INFLUXDB_PASS=password"
+        ],
         "filters": [
             "has_metrics"
         ]
@@ -72,6 +77,10 @@ That's right, you can collect different types of metrics (ex. Influx,
 Graphite, OpenTSDB, Nagios, etc.), Sensu will extract and transform
 them, and this handler will populate them into your InfluxDB.
 
+**Security Note:** The InfluxDB addr, username and password are treated as a security sensitive configuration options in this example and are loaded into the handler config as an env_vars instead of as a command arguments. Command arguments are commonaly readable from the process table by other unprivaledged users on a system (ex: `ps` and `top` commands), so it's a better practise to read in sensitive information via environment variables or configuration files as part of command execution. The command flags for these configuration options are are provided as an override for testing purposes.
+
+
+
 ## Usage Examples
 
 Help:
@@ -80,13 +89,14 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port'
+  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to value of INFLUXDB_ADDR env variable
   -d, --db-name string         the influxdb to send metrics to
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
-  -p, --password string        the password for the given db
+  -p, --password string        the password for the given db, defaults to value of INFLUXDB_PASS env variable
       --precision string       the precision value of the metric (default "s")
-  -u, --username string        the username for the given db
+  -u, --username string        the username for the given db, defaults to value of INFLUXDB_USER env variable
+
 ```
 
 ## Contributing
