@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Adds .bonsai.yml.
+- Use of envvar by default for sensitive InfluxDB credentials: addr,username, and password. This prevents leaking of sensitive credential into system process table via command argument. This is a backwards compatible change, commandline arguments can still be used to override envvar values. Here is the envvar to argument mapping:
+    - INFLUXDB_ADDR => --addr 
+    - INFLUXDB_USER => --username
+    - INFLUXDB_PASS => --password
 
 ## [3.1.0] - 2018-12-14
 ### Added
