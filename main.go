@@ -81,7 +81,6 @@ func configureRootCommand() *cobra.Command {
 		false,
 		"if true, the influx client skips https certificate verification")
 
-	/* Cannot mark envvar backed arguments as required, must manually check */
 	_ = cmd.MarkFlagRequired("db-name")
 
 	return cmd
