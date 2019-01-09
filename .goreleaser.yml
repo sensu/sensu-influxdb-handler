@@ -5,16 +5,12 @@ builds:
     - CGO_ENABLED=0
     main: main.go
     # Set the binary output location to bin/ so archive will comply with Sensu Go Asset structure
-    binary: bin/sensu-influxdb-handler
+    binary: bin/{{ .ProjectName }}
     goos:
-      #-android
       - darwin
-      - dragonfly
       - freebsd
       - linux
       - netbsd
-      #- openbsd # TODO: fix up gopsutil to not require CGO
-      #- plan9
       - solaris
       - windows
     goarch:
@@ -22,12 +18,6 @@ builds:
       - 386
       - arm
       - arm64
-      - ppc64
-      - ppc64le
-      - mips
-      - mipsle
-      - mips64
-      - mips64le
     goarm:
       - 5
       - 6
@@ -36,15 +26,6 @@ builds:
       # TODO: add freebsd/arm support to gopsutil
       - goos: freebsd
         goarch: arm
-      # TODO: add linux/ppc64 support to gopsutil
-      - goos: linux
-        goarch: ppc64
-        # TODO: add linux/mips64 support to gopsutil
-      - goos: linux
-        goarch: mips64
-        # TODO: add linux/mips64le support to gopsutil
-      - goos: linux
-        goarch: mips64le
 
 checksum:
   # You can change the name of the checksums file.
