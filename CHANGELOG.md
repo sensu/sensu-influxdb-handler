@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Updated travis, goreleaser configurations.
+- Updated license.
+
+### Removed
+- Removed redundant post deploy scripts for travis.
 
 ## [3.1.1] - 2019-01-09
 ### Added
@@ -20,11 +26,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Adds `--insecure-skip-verify` flag (still defaults to false).
 
 ## [3.0.2] - 2018-12-05
-### Changes
+### Changed
 - Travis post-deploy script generates a sha512 for packages to be sensu asset compatible.
 
 ## [3.0.1] - 2018-11-30
-### Changes
+### Changed
 - Updated the goreleaser file to include env and main in the same
 build, hopefully stopping double builds.
 

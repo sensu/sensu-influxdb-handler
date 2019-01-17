@@ -11,12 +11,14 @@ install:
 script:
 - gometalinter.v1 --vendor --disable-all --enable=vet --enable=ineffassign
   --enable=goconst --tests ./...
+- go test -v -race ./...
 
-before_script: 
+before_script:
 - echo "REPO $TRAVIS_REPO_SLUG TAG ${TRAVIS_TAG}"
 
 before_deploy:
 - go get github.com/goreleaser/goreleaser
+
 deploy:
   - #goreleaser
     provider: script
@@ -25,10 +27,10 @@ deploy:
     on:
       tags: true
 
-after_deploy:  
-  - travis/generate-sha512sum.sh
-  - cat "dist/sha512_file"
-  - travis/github-release-upload.sh github_api_token=$GITHUB_TOKEN repo_slug="$TRAVIS_REPO_SLUG" tag="${TRAVIS_TAG}" filename="dist/$(cat dist/sha512_file)"
+after_deploy:
+  - git clone https://github.com/sensu/sensu-go-bonsai-asset.git bonsai
+  - bonsai/generate-sha512sum.sh
+  - bonsai/github-release-upload.sh github_api_token=$GITHUB_TOKEN repo_slug="$TRAVIS_REPO_SLUG" tag="${TRAVIS_TAG}" filename="dist/$(cat dist/sha512_file)"
 
 env:
   global:
