@@ -5,9 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Username and password are no longer required to be set, making it possible to connect to endpoints that do not have authentication enabled.
+
 ### Changed
 - Updated travis, goreleaser configurations.
 - Updated license.
+- If no endpoint addr is provided, the handler will default to http://localhost:8086/
 
 ### Removed
 - Removed redundant post deploy scripts for travis.

@@ -48,7 +48,7 @@ func configureRootCommand() *cobra.Command {
 		"addr",
 		"a",
 		os.Getenv("INFLUXDB_ADDR"),
-		"the address of the influxdb server, should be of the form 'http://host:port', defaults to value of INFLUXDB_ADDR env variable")
+		"the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable")
 
 	cmd.Flags().StringVarP(&username,
 		"username",
@@ -92,18 +92,8 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid argument(s) received")
 	}
 
-	/* Manually check security sensitive arguments */
 	if addr == "" {
-		_ = cmd.Help()
-		return fmt.Errorf("Influxdb addr not set")
-	}
-	if password == "" {
-		_ = cmd.Help()
-		return fmt.Errorf("Influxdb user password not set")
-	}
-	if username == "" {
-		_ = cmd.Help()
-		return fmt.Errorf("Influxdb username not set")
+		addr = "http://localhost:8086"
 	}
 
 	if stdin == nil {

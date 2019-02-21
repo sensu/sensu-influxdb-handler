@@ -89,7 +89,7 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to value of INFLUXDB_ADDR env variable
+  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable
   -d, --db-name string         the influxdb to send metrics to
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
