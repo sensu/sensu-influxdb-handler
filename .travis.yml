@@ -16,16 +16,14 @@ script:
 before_script:
 - echo "REPO $TRAVIS_REPO_SLUG TAG ${TRAVIS_TAG}"
 
-before_deploy:
-- go get github.com/goreleaser/goreleaser
-
 deploy:
   - #goreleaser
     provider: script
-    script: goreleaser
+    script: curl -sL https://git.io/goreleaser | bash
     skip_cleanup: true
     on:
       tags: true
+      condition: $TRAVIS_OS_NAME = linux
 
 after_deploy:
   - git clone https://github.com/sensu/sensu-go-bonsai-asset.git bonsai
