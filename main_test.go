@@ -2,22 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
-	"github.com/sensu/sensu-go/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSendMetrics(t *testing.T) {
 	assert := assert.New(t)
-	event := types.FixtureEvent("entity1", "check1")
+	event := corev2.FixtureEvent("entity1", "check1")
 	event.Check = nil
-	event.Metrics = types.FixtureMetrics()
+	event.Metrics = corev2.FixtureMetrics()
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
@@ -28,7 +28,7 @@ func TestSendMetrics(t *testing.T) {
 		require.NoError(t, err)
 	}))
 
-	addr = apiStub.URL
+	config.Addr = apiStub.URL
 	err := sendMetrics(event)
 	assert.NoError(err)
 }
@@ -40,16 +40,16 @@ func TestMain(t *testing.T) {
 		_ = os.Remove(file.Name())
 	}()
 
-	event := types.FixtureEvent("entity1", "check1")
+	event := corev2.FixtureEvent("entity1", "check1")
 	event.Check = nil
-	event.Metrics = types.FixtureMetrics()
+	event.Metrics = corev2.FixtureMetrics()
 	eventJSON, _ := json.Marshal(event)
 	_, err := file.WriteString(string(eventJSON))
 	require.NoError(t, err)
 	require.NoError(t, file.Sync())
 	_, err = file.Seek(0, 0)
 	require.NoError(t, err)
-	stdin = file
+	os.Stdin = file
 	requestReceived := false
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
