@@ -77,7 +77,7 @@ var (
 		{
 			Path:      precision,
 			Argument:  precision,
-			Shorthand: "s",
+			Shorthand: "",
 			Default:   "",
 			Usage:     "the precision value of the metric",
 			Value:     &config.Precision,
