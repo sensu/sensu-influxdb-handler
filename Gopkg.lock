@@ -2,16 +2,25 @@
 
 
 [[projects]]
-  digest = "1:660af934d331e79d29317ffd5c76fceedaa1249167b1ee461d284c58d53291c6"
+  digest = "1:52c395c0928cc0bdc702c212704103fde073b78e090d2bf1f71d220bd2a6c7a5"
   name = "github.com/coreos/etcd"
   packages = [
     "auth/authpb",
     "etcdserver/etcdserverpb",
     "mvcc/mvccpb",
+    "version",
   ]
   pruneopts = "UT"
   revision = "98d308426819d892e149fe45f6fd542464cb1f9d"
   version = "v3.3.13"
+
+[[projects]]
+  digest = "1:05ffeeed3f0f05520de0679f6aa3219ffee69cfd6d9fb6c194879d4c818ad670"
+  name = "github.com/coreos/go-semver"
+  packages = ["semver"]
+  pruneopts = "UT"
+  revision = "e214231b295a8ea9479f11b70b35d5acf3556d9b"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -95,11 +104,27 @@
   revision = "c51d92363ec2fe2a5f67f01281f8b91b6c0fbb06"
 
 [[projects]]
-  digest = "1:1ed5ad32e321bd35d51e30dbbccab9d226ac290347838d03362b427459036a91"
+  digest = "1:f5a2051c55d05548d2d4fd23d244027b59fbd943217df8aa3b5e170ac2fd6e1b"
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
+  revision = "v1.1.6"
+
+[[projects]]
+  digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
+  name = "github.com/modern-go/concurrent"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
+  version = "1.0.3"
+
+[[projects]]
+  digest = "1:e32bdbdb7c377a07a9a46378290059822efdce5c8d96fe71940d87cb4f918855"
+  name = "github.com/modern-go/reflect2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -133,7 +158,7 @@
   revision = "2315d5715e36303a941d907f038da7f7c44c773b"
 
 [[projects]]
-  digest = "1:be364f871284e2e8f787235fe31d904cf9958f64b7b06fd52f97bf9af2672f91"
+  digest = "1:49b7a866da97f79b906a504e42ba71620a5587a1545d0b32498adca900425b11"
   name = "github.com/sensu/sensu-go"
   packages = [
     "api/core/v2",
@@ -142,8 +167,8 @@
     "util/strings",
   ]
   pruneopts = "UT"
-  revision = "32aea478ae74c3753710887d2ce2556b598d82bb"
-  version = "5.7.0"
+  revision = "078f6253fcc7b1b937274c7cb14b26b8db52fc4a"
+  version = "5.9.0"
 
 [[projects]]
   digest = "1:8cd72fbcf8f18cf753ca9c40723eaef3356e166437f33d219d977581b7024d14"
@@ -297,7 +322,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/influxdata/influxdb/client/v2",
-    "github.com/sensu/sensu-go/types",
+    "github.com/sensu/sensu-go/api/core/v2",
     "github.com/sensu/sensu-plugins-go-library/sensu",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
