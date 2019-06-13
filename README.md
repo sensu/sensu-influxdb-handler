@@ -15,6 +15,17 @@ Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 Download the latest version of the sensu-influxdb-handler from [releases][4],
 or create an executable script from this source.
 
+### Dependencies
+
+Sensu-influxdb-handler uses [golang/dep](https://github.com/golang/dep) for managing its dependencies. You will need to install the latest stable version of dep in order to download/modify dependencies.
+
+From the local path of the sensu-influxdb-handler repository:
+```
+dep ensure
+```
+
+### Compiling
+
 From the local path of the sensu-influxdb-handler repository:
 ```
 go build -o /usr/local/bin/sensu-influxdb-handler main.go
