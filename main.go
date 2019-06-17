@@ -1,134 +1,120 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
+	"github.com/influxdata/influxdb/client/v2"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
+	"github.com/sensu/sensu-plugins-go-library/sensu"
 	"strconv"
 	"strings"
 	"time"
+)
 
-	client "github.com/influxdata/influxdb/client/v2"
-	"github.com/sensu/sensu-go/types"
-	"github.com/spf13/cobra"
+type HandlerConfig struct {
+	sensu.PluginConfig
+	Addr               string
+	Username           string
+	Password           string
+	DbName             string
+	Precision          string
+	InsecureSkipVerify bool
+}
+
+const (
+	addr               = "addr"
+	username           = "username"
+	password           = "password"
+	dbName             = "db-name"
+	precision          = "precision"
+	insecureSkipVerify = "insecure-skip-verify"
 )
 
 var (
-	addr               string
-	dbName             string
-	username           string
-	password           string
-	precision          string
-	insecureSkipVerify bool
-	stdin              *os.File
+	config = HandlerConfig{
+		PluginConfig: sensu.PluginConfig{
+			Name:  "sensu-influxdb-handler",
+			Short: "an influxdb handler built for use with sensu",
+		},
+	}
+
+	influxdbConfigOptions = []*sensu.PluginConfigOption{
+		{
+			Path:      addr,
+			Env:       "INFLUXDB_ADDR",
+			Argument:  addr,
+			Shorthand: "a",
+			Default:   "http://localhost:8086",
+			Usage:     "the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
+			Value:     &config.Addr,
+		},
+		{
+			Path:      username,
+			Env:       "INFLUXDB_USER",
+			Argument:  username,
+			Shorthand: "u",
+			Default:   "",
+			Usage:     "the username for the given db, defaults to value of INFLUXDB_USER env variable",
+			Value:     &config.Username,
+		},
+		{
+			Path:      password,
+			Env:       "INFLUXDB_PASS",
+			Argument:  password,
+			Shorthand: "p",
+			Default:   "",
+			Usage:     "the password for the given db, defaults to value of INFLUXDB_PASS env variable",
+			Value:     &config.Password,
+		},
+		{
+			Path:      dbName,
+			Argument:  dbName,
+			Shorthand: "d",
+			Default:   "",
+			Usage:     "the influxdb to send metrics to",
+			Value:     &config.DbName,
+		},
+		{
+			Path:      precision,
+			Argument:  precision,
+			Shorthand: "",
+			Default:   "s",
+			Usage:     "the precision value of the metric",
+			Value:     &config.Precision,
+		},
+		{
+			Path:      insecureSkipVerify,
+			Argument:  insecureSkipVerify,
+			Shorthand: "i",
+			Default:   false,
+			Usage:     "if true, the influx client skips https certificate verification",
+			Value:     &config.InsecureSkipVerify,
+		},
+	}
 )
 
 func main() {
-	rootCmd := configureRootCommand()
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
+	goHandler := sensu.NewGoHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
+	goHandler.Execute()
 }
 
-func configureRootCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "sensu-influxdb-handler",
-		Short: "an influxdb handler built for use with sensu",
-		RunE:  run,
+func checkArgs(event *corev2.Event) error {
+	if len(config.DbName) == 0 {
+		return errors.New("missing db name")
 	}
-
-	/* Security sensitive arguments:
-	 *  prefer to be read directly from env for security
-	 *  Default to value stored in envvar
-	 *  Cannot mark as required
-	 */
-	cmd.Flags().StringVarP(&addr,
-		"addr",
-		"a",
-		os.Getenv("INFLUXDB_ADDR"),
-		"the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable")
-
-	cmd.Flags().StringVarP(&username,
-		"username",
-		"u",
-		os.Getenv("INFLUXDB_USER"),
-		"the username for the given db, defaults to value of INFLUXDB_USER env variable")
-
-	cmd.Flags().StringVarP(&password,
-		"password",
-		"p",
-		os.Getenv("INFLUXDB_PASS"),
-		"the password for the given db, defaults to value of INFLUXDB_PASS env variable")
-
-	/* Non-sensitive arguments */
-	cmd.Flags().StringVarP(&dbName,
-		"db-name",
-		"d",
-		"",
-		"the influxdb to send metrics to")
-
-	cmd.Flags().StringVarP(&precision,
-		"precision",
-		"",
-		"s",
-		"the precision value of the metric")
-
-	cmd.Flags().BoolVarP(&insecureSkipVerify,
-		"insecure-skip-verify",
-		"i",
-		false,
-		"if true, the influx client skips https certificate verification")
-
-	_ = cmd.MarkFlagRequired("db-name")
-
-	return cmd
-}
-
-func run(cmd *cobra.Command, args []string) error {
-	if len(args) != 0 {
-		_ = cmd.Help()
-		return fmt.Errorf("invalid argument(s) received")
-	}
-
-	if addr == "" {
-		addr = "http://localhost:8086"
-	}
-
-	if stdin == nil {
-		stdin = os.Stdin
-	}
-
-	eventJSON, err := ioutil.ReadAll(stdin)
-	if err != nil {
-		return fmt.Errorf("failed to read stdin: %s", err)
-	}
-
-	event := &types.Event{}
-	err = json.Unmarshal(eventJSON, event)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal stdin data: %s", err)
-	}
-
-	if err = event.Validate(); err != nil {
-		return fmt.Errorf("failed to validate event: %s", err)
-	}
-
 	if !event.HasMetrics() {
 		return fmt.Errorf("event does not contain metrics")
 	}
-
-	return sendMetrics(event)
+	return nil
 }
 
-func sendMetrics(event *types.Event) error {
+func sendMetrics(event *corev2.Event) error {
 	var pt *client.Point
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:               addr,
-		Username:           username,
-		Password:           password,
-		InsecureSkipVerify: insecureSkipVerify,
+		Addr:               config.Addr,
+		Username:           config.Username,
+		Password:           config.Password,
+		InsecureSkipVerify: config.InsecureSkipVerify,
 	})
 	if err != nil {
 		return err
@@ -136,8 +122,8 @@ func sendMetrics(event *types.Event) error {
 	defer c.Close()
 
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  dbName,
-		Precision: precision,
+		Database:  config.DbName,
+		Precision: config.Precision,
 	})
 	if err != nil {
 		return err
