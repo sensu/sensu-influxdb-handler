@@ -6,8 +6,8 @@
 - [Usage examples](#usage-examples)
 - [Configuration](#configuration)
   - [Asset registration](#asset-registration)
-  - [Asset manifest](#asset-manifest)
-  - [Handler manifest](#handler-manifest)
+  - [Asset definition](#asset-definition)
+  - [Handler definition](#handler-definition)
   - [Check manifest](#check-manifest)
 - [Installation from source and contributing](#installation-from-source-and-contributing)
 
@@ -51,7 +51,7 @@ Assets are the best way to make use of this handler. If you're not using an asse
 If you're using an earlier version of sensuctl, you can download the asset definition from [this project's Bonsai Asset Index page](https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler).
 
 
-### Asset manifest
+### Asset definition
 
 ```yml
 ---
@@ -76,7 +76,7 @@ spec:
   - entity.system.arch == 'amd64'
 ```
 
-### Handler manifest
+### Handler definition
 
 ```yml
 ---
@@ -99,7 +99,7 @@ spec:
   - sensu/sensu-influxdb-handler
 ```
 
-### Check manifest
+### Check definition
 ```yml
 ---
 api_version: core/v2
