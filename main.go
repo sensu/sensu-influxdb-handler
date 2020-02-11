@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
 	Addr               string
@@ -19,6 +20,7 @@ type HandlerConfig struct {
 	DbName             string
 	Precision          string
 	InsecureSkipVerify bool
+	CheckStatusMetric  bool
 }
 
 const (
@@ -28,6 +30,7 @@ const (
 	dbName             = "db-name"
 	precision          = "precision"
 	insecureSkipVerify = "insecure-skip-verify"
+	checkStatusMetric  = "check-status-metric"
 )
 
 var (
@@ -90,6 +93,14 @@ var (
 			Usage:     "if true, the influx client skips https certificate verification",
 			Value:     &config.InsecureSkipVerify,
 		},
+		{
+			Path:      checkStatusMetric,
+			Argument:  checkStatusMetric,
+			Shorthand: "c",
+			Default:   false,
+			Usage:     "if true, the check status result will be captured as a metric. Does not work with other metric processing.",
+			Value:     &config.CheckStatusMetric,
+		},
 	}
 )
 
@@ -102,8 +113,11 @@ func checkArgs(event *corev2.Event) error {
 	if len(config.DbName) == 0 {
 		return errors.New("missing db name")
 	}
-	if !event.HasMetrics() {
+	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
+	}
+	if event.HasMetrics() && config.CheckStatusMetric {
+		return fmt.Errorf("can't process metrics and check status field together")
 	}
 	return nil
 }
@@ -129,17 +143,15 @@ func sendMetrics(event *corev2.Event) error {
 		return err
 	}
 
-	for _, point := range event.Metrics.Points {
-		var tagKey string
-		nameField := strings.Split(point.Name, ".")
-		name := nameField[0]
-		if len(nameField) > 1 {
-			tagKey = strings.Join(nameField[1:], ".")
-		} else {
-			tagKey = "value"
-		}
-		fields := map[string]interface{}{tagKey: point.Value}
-		stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
+	// process the check status field as a metric if requested, otherwise process collected metrics.
+	if config.CheckStatusMetric {
+		tags := make(map[string]string)
+		tags["sensu_entity_name"] = event.Entity.Name
+		tags["namespace"] = event.Entity.Namespace
+
+		fields := map[string]interface{}{"status": event.Check.Status}
+
+		stringTimestamp := strconv.FormatInt(event.Timestamp, 10)
 		if len(stringTimestamp) > 10 {
 			stringTimestamp = stringTimestamp[:10]
 		}
@@ -148,17 +160,43 @@ func sendMetrics(event *corev2.Event) error {
 			return err
 		}
 		timestamp := time.Unix(t, 0)
-		tags := make(map[string]string)
-		tags["sensu_entity_name"] = event.Entity.Name
-		for _, tag := range point.Tags {
-			tags[tag.Name] = tag.Value
-		}
-
-		pt, err = client.NewPoint(name, tags, fields, timestamp)
+		pt, err = client.NewPoint(event.Check.GetName(), tags, fields, timestamp)
 		if err != nil {
 			return err
 		}
 		bp.AddPoint(pt)
+	} else {
+		for _, point := range event.Metrics.Points {
+			var tagKey string
+			nameField := strings.Split(point.Name, ".")
+			name := nameField[0]
+			if len(nameField) > 1 {
+				tagKey = strings.Join(nameField[1:], ".")
+			} else {
+				tagKey = "value"
+			}
+			fields := map[string]interface{}{tagKey: point.Value}
+			stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
+			if len(stringTimestamp) > 10 {
+				stringTimestamp = stringTimestamp[:10]
+			}
+			t, err := strconv.ParseInt(stringTimestamp, 10, 64)
+			if err != nil {
+				return err
+			}
+			timestamp := time.Unix(t, 0)
+			tags := make(map[string]string)
+			tags["sensu_entity_name"] = event.Entity.Name
+			for _, tag := range point.Tags {
+				tags[tag.Name] = tag.Value
+			}
+
+			pt, err = client.NewPoint(name, tags, fields, timestamp)
+			if err != nil {
+				return err
+			}
+			bp.AddPoint(pt)
+		}
 	}
 
 	if err = c.Write(bp); err != nil {
