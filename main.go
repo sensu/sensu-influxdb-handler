@@ -98,7 +98,7 @@ var (
 			Argument:  checkStatusMetric,
 			Shorthand: "c",
 			Default:   false,
-			Usage:     "if true, the check status result will be captured as a metric. Does not work with other metric processing.",
+			Usage:     "if true, the check status result will be captured as a metric",
 			Value:     &config.CheckStatusMetric,
 		},
 	}
@@ -115,9 +115,6 @@ func checkArgs(event *corev2.Event) error {
 	}
 	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
-	}
-	if event.HasMetrics() && config.CheckStatusMetric {
-		return fmt.Errorf("can't process metrics and check status field together")
 	}
 	return nil
 }
@@ -143,15 +140,39 @@ func sendMetrics(event *corev2.Event) error {
 		return err
 	}
 
-	// process the check status field as a metric if requested, otherwise process collected metrics.
+	// Add the check status field as a metric if requested. Measurement recorded as the check name.
 	if config.CheckStatusMetric {
-		tags := make(map[string]string)
-		tags["sensu_entity_name"] = event.Entity.Name
-		tags["namespace"] = event.Entity.Namespace
+		var tagList = make([]*corev2.MetricTag, 0)
+		tagList = append(tagList,
+			&corev2.MetricTag{
+				Name:  "namespace",
+				Value: event.Entity.Namespace,
+			})
+		var statusMetric = &corev2.MetricPoint{
+			Name:      event.Check.Name + ".status",
+			Value:     float64(event.Check.Status),
+			Timestamp: event.Timestamp,
+			Tags:      tagList,
+		}
+		// bootstrap the event for metrics
+		if !event.HasMetrics() {
+			event.Metrics = new(corev2.Metrics)
+			event.Metrics.Points = make([]*corev2.MetricPoint, 0)
+		}
+		event.Metrics.Points = append(event.Metrics.Points, statusMetric)
+	}
 
-		fields := map[string]interface{}{"status": event.Check.Status}
-
-		stringTimestamp := strconv.FormatInt(event.Timestamp, 10)
+	for _, point := range event.Metrics.Points {
+		var tagKey string
+		nameField := strings.Split(point.Name, ".")
+		name := nameField[0]
+		if len(nameField) > 1 {
+			tagKey = strings.Join(nameField[1:], ".")
+		} else {
+			tagKey = "value"
+		}
+		fields := map[string]interface{}{tagKey: point.Value}
+		stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
 		if len(stringTimestamp) > 10 {
 			stringTimestamp = stringTimestamp[:10]
 		}
@@ -160,43 +181,17 @@ func sendMetrics(event *corev2.Event) error {
 			return err
 		}
 		timestamp := time.Unix(t, 0)
-		pt, err = client.NewPoint(event.Check.GetName(), tags, fields, timestamp)
+		tags := make(map[string]string)
+		tags["sensu_entity_name"] = event.Entity.Name
+		for _, tag := range point.Tags {
+			tags[tag.Name] = tag.Value
+		}
+
+		pt, err = client.NewPoint(name, tags, fields, timestamp)
 		if err != nil {
 			return err
 		}
 		bp.AddPoint(pt)
-	} else {
-		for _, point := range event.Metrics.Points {
-			var tagKey string
-			nameField := strings.Split(point.Name, ".")
-			name := nameField[0]
-			if len(nameField) > 1 {
-				tagKey = strings.Join(nameField[1:], ".")
-			} else {
-				tagKey = "value"
-			}
-			fields := map[string]interface{}{tagKey: point.Value}
-			stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
-			if len(stringTimestamp) > 10 {
-				stringTimestamp = stringTimestamp[:10]
-			}
-			t, err := strconv.ParseInt(stringTimestamp, 10, 64)
-			if err != nil {
-				return err
-			}
-			timestamp := time.Unix(t, 0)
-			tags := make(map[string]string)
-			tags["sensu_entity_name"] = event.Entity.Name
-			for _, tag := range point.Tags {
-				tags[tag.Name] = tag.Value
-			}
-
-			pt, err = client.NewPoint(name, tags, fields, timestamp)
-			if err != nil {
-				return err
-			}
-			bp.AddPoint(pt)
-		}
 	}
 
 	if err = c.Write(bp); err != nil {

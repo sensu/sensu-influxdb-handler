@@ -36,7 +36,7 @@ Usage:
 
 Flags:
   -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
-  -c, --check-status-metric    if true, the check status result will be captured as a metric. Does not work with other metric processing.
+  -c, --check-status-metric    if true, the check status result will be captured as a metric
   -d, --db-name string         the influxdb to send metrics to
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
@@ -165,6 +165,8 @@ From the local path of the sensu-influxdb-handler repository:
 ```
 dep ensure
 ```
+
+Note: Sensu-influxdb-handler also uses go modules in case you're not using dep.
 
 ### Compiling
 
