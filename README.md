@@ -82,7 +82,7 @@ spec:
   - entity.system.arch == 'amd64'
 ```
 
-### Handler definition for [Metrics]
+### Handler definition
 
 ```yml
 ---
@@ -101,28 +101,6 @@ spec:
   - INFLUXDB_PASS=password
   filters:
   - has_metrics
-  runtime_assets:
-  - sensu/sensu-influxdb-handler
-```
-
-### Handler definition for [Check Status]
-
-```yml
----
-api_version: core/v2
-type: Handler
-metadata:
-  namespace: default
-  name: influxdb-check-status
-spec:
-  type: pipe
-  command: sensu-influxdb-handler -d sensu -c
-  timeout: 10
-  env_vars:
-  - INFLUXDB_ADDR=http://influxdb.default.svc.cluster.local:8086
-  - INFLUXDB_USER=sensu
-  - INFLUXDB_PASS=password
-  filters: []
   runtime_assets:
   - sensu/sensu-influxdb-handler
 ```
