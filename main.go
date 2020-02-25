@@ -143,11 +143,6 @@ func sendMetrics(event *corev2.Event) error {
 	// Add the check status field as a metric if requested. Measurement recorded as the check name.
 	if config.CheckStatusMetric && event.HasCheck() {
 		var tagList = make([]*corev2.MetricTag, 0)
-		tagList = append(tagList,
-			&corev2.MetricTag{
-				Name:  "namespace",
-				Value: event.Entity.Namespace,
-			})
 		var statusMetric = &corev2.MetricPoint{
 			Name:      event.Check.Name + ".status",
 			Value:     float64(event.Check.Status),
