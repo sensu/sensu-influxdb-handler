@@ -1,4 +1,4 @@
-module github.com/mylesw42/sensu-influxdb-handler
+module github.com/sensu/sensu-influxdb-handler
 
 go 1.13
 
