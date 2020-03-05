@@ -23,7 +23,7 @@ store, instrument, and visualize the metric data from Sensu.
 This handler also supports creating metrics out of check status results. This enables
 operators to leverage InfluxDB as a long-term storage archive for Sensu check result
 history. This feature will only work with the "-c" flag, and any check can add it as
-handler. Please see [Asset definition](#asset-definition)
+handler.
 
 Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 
