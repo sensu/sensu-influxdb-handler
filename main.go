@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/influxdata/influxdb/client/v2"
-	corev2 "github.com/sensu/sensu-go/api/core/v2"
-	"github.com/sensu/sensu-plugins-go-library/sensu"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/influxdata/influxdb/client/v2"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
+	"github.com/sensu/sensu-plugins-go-library/sensu"
 )
 
 // HandlerConfig for runtime values
@@ -142,12 +143,10 @@ func sendMetrics(event *corev2.Event) error {
 
 	// Add the check status field as a metric if requested. Measurement recorded as the check name.
 	if config.CheckStatusMetric && event.HasCheck() {
-		var tagList = make([]*corev2.MetricTag, 0)
 		var statusMetric = &corev2.MetricPoint{
 			Name:      event.Check.Name + ".status",
 			Value:     float64(event.Check.Status),
 			Timestamp: event.Timestamp,
-			Tags:      tagList,
 		}
 		// bootstrap the event for metrics
 		if !event.HasMetrics() {
