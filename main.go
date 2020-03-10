@@ -3,14 +3,16 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/influxdata/influxdb/client/v2"
-	corev2 "github.com/sensu/sensu-go/api/core/v2"
-	"github.com/sensu/sensu-plugins-go-library/sensu"
 	"strconv"
 	"strings"
 	"time"
+
+	client "github.com/influxdata/influxdb1-client/v2"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
+	"github.com/sensu/sensu-plugins-go-library/sensu"
 )
 
+// HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
 	Addr               string
@@ -19,6 +21,7 @@ type HandlerConfig struct {
 	DbName             string
 	Precision          string
 	InsecureSkipVerify bool
+	CheckStatusMetric  bool
 }
 
 const (
@@ -28,6 +31,7 @@ const (
 	dbName             = "db-name"
 	precision          = "precision"
 	insecureSkipVerify = "insecure-skip-verify"
+	checkStatusMetric  = "check-status-metric"
 )
 
 var (
@@ -90,6 +94,14 @@ var (
 			Usage:     "if true, the influx client skips https certificate verification",
 			Value:     &config.InsecureSkipVerify,
 		},
+		{
+			Path:      checkStatusMetric,
+			Argument:  checkStatusMetric,
+			Shorthand: "c",
+			Default:   false,
+			Usage:     "if true, the check status result will be captured as a metric",
+			Value:     &config.CheckStatusMetric,
+		},
 	}
 )
 
@@ -102,7 +114,7 @@ func checkArgs(event *corev2.Event) error {
 	if len(config.DbName) == 0 {
 		return errors.New("missing db name")
 	}
-	if !event.HasMetrics() {
+	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
 	}
 	return nil
@@ -127,6 +139,21 @@ func sendMetrics(event *corev2.Event) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	// Add the check status field as a metric if requested. Measurement recorded as the check name.
+	if config.CheckStatusMetric && event.HasCheck() {
+		var statusMetric = &corev2.MetricPoint{
+			Name:      event.Check.Name + ".status",
+			Value:     float64(event.Check.Status),
+			Timestamp: event.Timestamp,
+		}
+		// bootstrap the event for metrics
+		if !event.HasMetrics() {
+			event.Metrics = new(corev2.Metrics)
+			event.Metrics.Points = make([]*corev2.MetricPoint, 0)
+		}
+		event.Metrics.Points = append(event.Metrics.Points, statusMetric)
 	}
 
 	for _, point := range event.Metrics.Points {

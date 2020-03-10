@@ -20,6 +20,11 @@ pass through the event pipeline, allowing Sensu to deliver the metrics to the
 configured metric event handlers. This InfluxDB handler will allow you to
 store, instrument, and visualize the metric data from Sensu.
 
+This handler also supports creating metrics out of check status results. This enables
+operators to leverage InfluxDB as a long-term storage archive for Sensu check result
+history. This feature will only work with the "-c" flag, and any check can add it as
+handler.
+
 Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 
 ## Usage Examples
@@ -30,7 +35,8 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable
+  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
+  -c, --check-status-metric    if true, the check status result will be captured as a metric
   -d, --db-name string         the influxdb to send metrics to
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
@@ -46,7 +52,7 @@ Flags:
 
 Assets are the best way to make use of this handler. If you're not using an asset, please consider doing so! If you're using sensuctl 5.13 or later, you can use the following command to add the asset: 
 
-`sensuctl asset add sensu/sensu-email-handler`
+`sensuctl asset add sensu/sensu-influxdb-handler`
 
 If you're using an earlier version of sensuctl, you can download the asset definition from [this project's Bonsai Asset Index page](https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler).
 
@@ -131,12 +137,7 @@ or create an executable script from this source.
 
 ### Dependencies
 
-Sensu-influxdb-handler uses [golang/dep](https://github.com/golang/dep) for managing its dependencies. You will need to install the latest stable version of dep in order to download/modify dependencies.
-
-From the local path of the sensu-influxdb-handler repository:
-```
-dep ensure
-```
+Sensu-influxdb-handler uses go modules for managing package dependencies.
 
 ### Compiling
 
