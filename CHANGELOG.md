@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.2.0] - 2020-03-10
+### Added
+- Added the `--check-status-metric` flag to create metrics from the check status.
+
+### Changed
+- Migrated from `dep` to go modules (`go mod`) for managing package dependencies.
+- Migrated from TravisCI to GitHub Actions for build, test, and packaging.
+
 ## [3.1.2] - 2019-02-21
 ### Fixed
 - Username and password are no longer required to be set, making it possible to

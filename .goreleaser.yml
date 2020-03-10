@@ -4,6 +4,7 @@ builds:
     env:
     - CGO_ENABLED=0
     main: main.go
+    ldflags: '-s -w -X github.com/sensu-community/sensu-plugin-sdk/version.build={{.Version}} -X github.com/sensu-community/sensu-plugin-sdk/version.commit={{.Commit}} -X github.com/sensu-community/sensu-plugin-sdk/version.date={{.Date}}'
     # Set the binary output location to bin/ so archive will comply with Sensu Go Asset structure
     binary: bin/{{ .ProjectName }}
     goos:
@@ -26,24 +27,26 @@ builds:
       # TODO: add freebsd/arm support to gopsutil
       - goos: freebsd
         goarch: arm
+    targets:
+      - darwin_amd64
+      - darwin_386
+      - linux_386
+      - linux_amd64
+      - linux_arm_5
+      - linux_arm_6
+      - linux_arm_7
+      - linux_arm64
+      - windows_386
+      - windows_amd64
 
 checksum:
-  # You can change the name of the checksums file.
-  # Default is `{{ .ProjectName }}_{{ .Version }}_checksums.txt`.
-  name_template: "{{ .ProjectName }}_{{ .Version }}_sha256-checksums.txt"
+  name_template: "{{ .ProjectName }}_{{ .Version }}_sha512-checksums.txt"
+  algorithm: sha512
 
-archive:
-  format: tar.gz
-  files:
-    - LICENSE
-    - README.md
-    - CHANGELOG.md
-
-  # You can change the name of the GitHub release.
-  # This is parsed with the Go template engine and the following variables
-  # are available:
-  # - ProjectName
-  # - Tag
-  # - Version (Git tag without `v` prefix)
-  # Default is ``
-  #name_template: "{{.ProjectName}}-v{{.Version}}"
+archives:
+  - id: tar
+    format: tar.gz
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
