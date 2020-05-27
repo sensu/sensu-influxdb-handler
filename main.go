@@ -8,8 +8,8 @@ import (
 	"time"
 
 	client "github.com/influxdata/influxdb1-client/v2"
+	"github.com/sensu-community/sensu-plugin-sdk/sensu"
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
-	"github.com/sensu/sensu-plugins-go-library/sensu"
 )
 
 // HandlerConfig for runtime values
@@ -39,6 +39,7 @@ var (
 		PluginConfig: sensu.PluginConfig{
 			Name:  "sensu-influxdb-handler",
 			Short: "an influxdb handler built for use with sensu",
+			Keyspace: "sensu.io/plugins/sensu-influxdb-handler/config",
 		},
 	}
 
@@ -188,9 +189,74 @@ func sendMetrics(event *corev2.Event) error {
 		bp.AddPoint(pt)
 	}
 
+	annotate, action := event_needs_annotation(event)
+
+	if annotate {
+		tags := make(map[string]string)
+		tags["entity"] = event.Entity.Name
+		tags["check"] = event.Check.Name
+		tags["action"] = action
+		
+		title := fmt.Sprintf("%q", "Sensu Event")
+		description := fmt.Sprintf("%q", formatted_message(event, action))
+		fields := make(map[string]interface{})
+		fields["title"] = title
+		fields["description"] = description
+		fields["status"] = event.Check.Status
+		fields["occurrences"] = event.Check.Occurrences
+
+		stringTimestamp := strconv.FormatInt(event.Timestamp, 10)
+		if len(stringTimestamp) > 10 {
+			stringTimestamp = stringTimestamp[:10]
+		}
+		t, err := strconv.ParseInt(stringTimestamp, 10, 64)
+		if err != nil {
+			return err
+		}
+		timestamp := time.Unix(t, 0)
+
+		pt, err = client.NewPoint("sensu_event", tags, fields, timestamp)
+		if err != nil {
+			return err
+		}
+		bp.AddPoint(pt)
+	}
+
 	if err = c.Write(bp); err != nil {
 		return err
 	}
 
 	return c.Close()
+}
+
+func event_needs_annotation(event *corev2.Event) (bool, string) {
+	// No check, no need to be here
+	if !event.HasCheck() {
+		return false, ""
+	}
+
+	// Alert
+	if event.Check.Status != 0 {
+		return true, "create"
+	}
+
+	// Status 0, steady as she goes, not an alert
+	if event.Check.Occurrences > 1 {
+		return false, ""
+	}
+
+	// Status 0, but first occurrence so it's a resolution, assumed
+	return true, "resolve"
+}
+
+func formatted_message(event *corev2.Event, action string) string {
+	var formatted_action = "ALERT"
+	if action == "resolve" {
+		formatted_action = "RESOLVED"
+	}
+	summary := strings.TrimSuffix(event.Check.Output, "\n")
+	if len(summary) > 100 {
+		summary = summary[:100]
+	}
+	return fmt.Sprintf("%s - %s/%s:%s", formatted_action, event.Entity.Name, event.Check.Name, summary)
 }

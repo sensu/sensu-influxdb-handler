@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Switched to new community SDK
+- Added binary name sensu-influxdb-handler to .gitignore
+
+### Added
+- Added config keyspace for annotation support
+- Added event annotation for Sensu Enterprise parity
+
 ## [3.2.0] - 2020-03-10
 ### Added
 - Added the `--check-status-metric` flag to create metrics from the check status.
