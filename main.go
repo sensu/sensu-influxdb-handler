@@ -37,8 +37,8 @@ const (
 var (
 	config = HandlerConfig{
 		PluginConfig: sensu.PluginConfig{
-			Name:  "sensu-influxdb-handler",
-			Short: "an influxdb handler built for use with sensu",
+			Name:     "sensu-influxdb-handler",
+			Short:    "an influxdb handler built for use with sensu",
 			Keyspace: "sensu.io/plugins/sensu-influxdb-handler/config",
 		},
 	}
@@ -189,16 +189,16 @@ func sendMetrics(event *corev2.Event) error {
 		bp.AddPoint(pt)
 	}
 
-	annotate, action := event_needs_annotation(event)
+	annotate, action := eventNeedsAnnotation(event)
 
 	if annotate {
 		tags := make(map[string]string)
 		tags["entity"] = event.Entity.Name
 		tags["check"] = event.Check.Name
 		tags["action"] = action
-		
+
 		title := fmt.Sprintf("%q", "Sensu Event")
-		description := fmt.Sprintf("%q", formatted_message(event, action))
+		description := fmt.Sprintf("%q", formattedMessage(event, action, 100))
 		fields := make(map[string]interface{})
 		fields["title"] = title
 		fields["description"] = description
@@ -229,7 +229,7 @@ func sendMetrics(event *corev2.Event) error {
 	return c.Close()
 }
 
-func event_needs_annotation(event *corev2.Event) (bool, string) {
+func eventNeedsAnnotation(event *corev2.Event) (bool, string) {
 	// No check, no need to be here
 	if !event.HasCheck() {
 		return false, ""
@@ -249,14 +249,14 @@ func event_needs_annotation(event *corev2.Event) (bool, string) {
 	return true, "resolve"
 }
 
-func formatted_message(event *corev2.Event, action string) string {
+func formattedMessage(event *corev2.Event, action string, maxSummary int) string {
 	var formatted_action = "ALERT"
 	if action == "resolve" {
 		formatted_action = "RESOLVED"
 	}
 	summary := strings.TrimSuffix(event.Check.Output, "\n")
-	if len(summary) > 100 {
-		summary = summary[:100]
+	if len(summary) > maxSummary {
+		summary = summary[:maxSummary]
 	}
-	return fmt.Sprintf("%s - %s/%s:%s", formatted_action, event.Entity.Name, event.Check.Name, summary)
+	return fmt.Sprintf("%s - %s/%s : %s", formatted_action, event.Entity.Name, event.Check.Name, summary)
 }

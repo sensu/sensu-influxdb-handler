@@ -53,6 +53,42 @@ func TestSendMetrics(t *testing.T) {
 	assert.NoError(err)
 }
 
+func TestEventNeedsAnnotation(t *testing.T) {
+	assert := assert.New(t)
+	event := corev2.FixtureEvent("entity1", "check1")
+
+	b, s := eventNeedsAnnotation(event)
+	assert.True(b)
+	assert.Equal("resolve", s)
+
+	event.Check.Occurrences = 2
+	b, s = eventNeedsAnnotation(event)
+	assert.False(b)
+	assert.Equal("", s)
+
+	event.Check.Status = 1
+	b, s = eventNeedsAnnotation(event)
+	assert.True(b)
+	assert.Equal("create", s)
+
+	event.Check = nil
+	b, s = eventNeedsAnnotation(event)
+	assert.False(b)
+}
+
+func TestFormattedMessage(t *testing.T) {
+	assert := assert.New(t)
+	event := corev2.FixtureEvent("entity1", "check1")
+	event.Check.Output = "Test Output"
+
+	s := formattedMessage(event, "create", 100)
+	assert.Equal("ALERT - entity1/check1 : Test Output", s)
+
+	s = formattedMessage(event, "resolve", 6)
+	assert.Equal("RESOLVED - entity1/check1 : Test O", s)
+
+}
+
 func TestMain(t *testing.T) {
 	assert := assert.New(t)
 	file, _ := ioutil.TempFile(os.TempDir(), "sensu-handler-influx-db-")
