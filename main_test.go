@@ -63,7 +63,7 @@ func TestSendAnnotation(t *testing.T) {
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
-		expectedBody := `sensu_event,action=create,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1i,title="\"Sensu Event\""`
+		expectedBody := `sensu_event,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1i,title="\"Sensu Event\""`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(`{"ok": true}`))
@@ -79,36 +79,20 @@ func TestEventNeedsAnnotation(t *testing.T) {
 	assert := assert.New(t)
 	event := corev2.FixtureEvent("entity1", "check1")
 
-	b, s := eventNeedsAnnotation(event)
+	b := eventNeedsAnnotation(event)
 	assert.True(b)
-	assert.Equal("resolve", s)
 
 	event.Check.Occurrences = 2
-	b, s = eventNeedsAnnotation(event)
+	b = eventNeedsAnnotation(event)
 	assert.False(b)
-	assert.Equal("", s)
 
 	event.Check.Status = 1
-	b, s = eventNeedsAnnotation(event)
+	b = eventNeedsAnnotation(event)
 	assert.True(b)
-	assert.Equal("create", s)
 
 	event.Check = nil
-	b, _ = eventNeedsAnnotation(event)
+	b = eventNeedsAnnotation(event)
 	assert.False(b)
-}
-
-func TestFormattedMessage(t *testing.T) {
-	assert := assert.New(t)
-	event := corev2.FixtureEvent("entity1", "check1")
-	event.Check.Output = "Test Output"
-
-	s := formattedMessage(event, "create", 100)
-	assert.Equal("ALERT - entity1/check1 : Test Output", s)
-
-	s = formattedMessage(event, "resolve", 6)
-	assert.Equal("RESOLVED - entity1/check1 : Test O", s)
-
 }
 
 func TestMain(t *testing.T) {

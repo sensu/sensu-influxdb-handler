@@ -190,16 +190,15 @@ func sendMetrics(event *corev2.Event) error {
 	}
 
 	// 1.x handler parity
-	annotate, action := eventNeedsAnnotation(event)
+	annotate := eventNeedsAnnotation(event)
 
 	if annotate {
 		tags := make(map[string]string)
 		tags["entity"] = event.Entity.Name
 		tags["check"] = event.Check.Name
-		tags["action"] = action
 
 		title := fmt.Sprintf("%q", "Sensu Event")
-		description := fmt.Sprintf("%q", formattedMessage(event, action, 100))
+		description := fmt.Sprintf("%q", sensu.FormattedMessage(event))
 		fields := make(map[string]interface{})
 		fields["title"] = title
 		fields["description"] = description
@@ -231,34 +230,22 @@ func sendMetrics(event *corev2.Event) error {
 }
 
 // Determine if an event needs an annotation
-func eventNeedsAnnotation(event *corev2.Event) (bool, string) {
+func eventNeedsAnnotation(event *corev2.Event) bool {
 	// No check, no need to be here
 	if !event.HasCheck() {
-		return false, ""
+		return false
 	}
 
 	// Alert (should this only happen on occurrence == 1?)
 	if event.Check.Status != 0 {
-		return true, "create"
+		return true
 	}
 
 	// Status 0, steady as she goes, not an alert
 	if event.Check.Occurrences > 1 {
-		return false, ""
+		return false
 	}
 
 	// Status 0, but first occurrence so it's a resolution, assumed
-	return true, "resolve"
-}
-
-func formattedMessage(event *corev2.Event, action string, maxSummary int) string {
-	var formatted_action = "ALERT"
-	if action == "resolve" {
-		formatted_action = "RESOLVED"
-	}
-	summary := strings.TrimSuffix(event.Check.Output, "\n")
-	if len(summary) > maxSummary {
-		summary = summary[:maxSummary]
-	}
-	return fmt.Sprintf("%s - %s/%s : %s", formatted_action, event.Entity.Name, event.Check.Name, summary)
+	return true
 }
