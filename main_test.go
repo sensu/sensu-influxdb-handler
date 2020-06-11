@@ -53,6 +53,48 @@ func TestSendMetrics(t *testing.T) {
 	assert.NoError(err)
 }
 
+func TestSendAnnotation(t *testing.T) {
+	assert := assert.New(t)
+	event := corev2.FixtureEvent("entity1", "check1")
+	event.Check.Status = 1
+	event.Check.Occurrences = 1
+	event.Check.Output = "FAILURE"
+	event.Metrics = corev2.FixtureMetrics()
+
+	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := ioutil.ReadAll(r.Body)
+		expectedBody := `sensu_event,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1i,title="\"Sensu Event\""`
+		assert.Contains(string(body), expectedBody)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"ok": true}`))
+		require.NoError(t, err)
+	}))
+
+	config.Addr = apiStub.URL
+	err := sendMetrics(event)
+	assert.NoError(err)
+}
+
+func TestEventNeedsAnnotation(t *testing.T) {
+	assert := assert.New(t)
+	event := corev2.FixtureEvent("entity1", "check1")
+
+	b := eventNeedsAnnotation(event)
+	assert.True(b)
+
+	event.Check.Occurrences = 2
+	b = eventNeedsAnnotation(event)
+	assert.False(b)
+
+	event.Check.Status = 1
+	b = eventNeedsAnnotation(event)
+	assert.True(b)
+
+	event.Check = nil
+	b = eventNeedsAnnotation(event)
+	assert.False(b)
+}
+
 func TestMain(t *testing.T) {
 	assert := assert.New(t)
 	file, _ := ioutil.TempFile(os.TempDir(), "sensu-handler-influx-db-")

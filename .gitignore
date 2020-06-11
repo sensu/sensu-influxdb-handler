@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+sensu-influxdb-handler
 
 # Test binary, build with `go test -c`
 *.test
