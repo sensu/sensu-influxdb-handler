@@ -67,6 +67,7 @@ var (
 			Env:       "INFLUXDB_PASS",
 			Argument:  password,
 			Shorthand: "p",
+			Secret:    true,
 			Default:   "",
 			Usage:     "the password for the given db, defaults to value of INFLUXDB_PASS env variable",
 			Value:     &config.Password,
