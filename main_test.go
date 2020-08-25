@@ -2,16 +2,28 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/sensu-community/sensu-plugin-sdk/sensu"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
-
-	corev2 "github.com/sensu/sensu-go/api/core/v2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"unsafe"
 )
+
+func GetUnexportedField(field reflect.Value) interface{} {
+	return reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Interface()
+}
+
+func SetUnexportedField(field reflect.Value, value interface{}) {
+	reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).
+		Elem().
+		Set(reflect.ValueOf(value))
+}
 
 func TestStatusMetrics(t *testing.T) {
 	assert := assert.New(t)
@@ -95,7 +107,7 @@ func TestEventNeedsAnnotation(t *testing.T) {
 	assert.False(b)
 }
 
-func TestMain(t *testing.T) {
+func TestExecute(t *testing.T) {
 	assert := assert.New(t)
 	file, _ := ioutil.TempFile(os.TempDir(), "sensu-handler-influx-db-")
 	defer func() {
@@ -125,6 +137,21 @@ func TestMain(t *testing.T) {
 	os.Args = []string{"influx-db", "-a", apiStub.URL, "-c", "-d", "foo", "-u", "bar", "-p", "baz"}
 	defer func() { os.Args = oldArgs }()
 
-	main()
+	//Need to pass a non-default exitStatus function to the handler to test handler Execute logic used in main().
+	var exitStatus int
+	exitStatus = 1
+	mockExit := func(i int) {
+		exitStatus = i
+	}
+
+	// exitFunction is unexported field, use helper function to set it to a new value
+	handler := sensu.NewGoHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
+	field := reflect.ValueOf(handler).Elem().FieldByName("exitFunction")
+	SetUnexportedField(field, mockExit)
+	assert.NotZero(exitStatus)
+	assert.False(requestReceived)
+	handler.Execute()
+	//statements after Execute() would not be called unless non-default exitFunction is used due to how default os.Exit() operates.
+	assert.Zero(exitStatus)
 	assert.True(requestReceived)
 }
