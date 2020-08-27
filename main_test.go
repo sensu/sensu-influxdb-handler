@@ -13,14 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var hostStrippingDataSet = []struct {
-	entityName string
-	expectedBody string
-}{
-	{"sensu.company.com", `answer,foo=bar,sensu_entity_name=sensu.company.com value=42`},
-	{"answer.company.com", `answer,foo=bar,sensu_entity_name=answer.company.com value=42`},
-}
-
 func TestStatusMetrics(t *testing.T) {
 	assert := assert.New(t)
 	event := corev2.FixtureEvent("entity1", "check1")
@@ -62,6 +54,38 @@ func TestSendMetrics(t *testing.T) {
 }
 
 func TestSendMetricsHostStripping(t *testing.T) {
+	var hostStrippingDataSet = []struct {
+		entityName string
+		expectedBody string
+		stripHost    bool
+	}{
+		{
+			entityName: "sensu.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=sensu.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "answer.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=answer.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "prod-eu-db01.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=prod-eu-db01.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "no-stripping.company.com",
+			expectedBody: `no-stripping,foo=bar,sensu_entity_name=no-stripping.company.com company.com.answer=42`,
+			stripHost: false,
+		},
+		{
+			entityName: "company.com",
+			expectedBody: `company,foo=bar,sensu_entity_name=company.com com.answer=42`,
+			stripHost: false,
+		},
+	}
+
 	for _, tt := range hostStrippingDataSet {
 		assert := assert.New(t)
 		event := corev2.FixtureEvent(tt.entityName, "check1")
@@ -78,7 +102,7 @@ func TestSendMetricsHostStripping(t *testing.T) {
 		}))
 
 		config.Addr = apiStub.URL
-		config.StripHost = true
+		config.StripHost = tt.stripHost
 		err := sendMetrics(event)
 		assert.NoError(err)
 	}
