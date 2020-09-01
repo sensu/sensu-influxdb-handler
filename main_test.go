@@ -53,6 +53,85 @@ func TestSendMetrics(t *testing.T) {
 	assert.NoError(err)
 }
 
+func TestSendMetricsHostStripping(t *testing.T) {
+	var hostStrippingDataSet = []struct {
+		entityName string
+		expectedBody string
+		metricName string
+		stripHost    bool
+	}{
+		{
+			entityName: "sensu.company.com",
+			metricName: "sensu.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=sensu.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "answer.company.com",
+			metricName: "answer.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=answer.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "prod-eu-db01.company.com",
+			metricName: "prod-eu-db01.company.com",
+			expectedBody: `answer,foo=bar,sensu_entity_name=prod-eu-db01.company.com value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "",
+			metricName: "",
+			expectedBody: `answer,foo=bar value=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "metric01",
+			metricName: "",
+			expectedBody: `foo=bar,sensu_entity_name=metric01 answer=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "prod-eu-db01.company.com",
+			metricName: "different.company.com",
+			expectedBody: `different,foo=bar,sensu_entity_name=prod-eu-db01.company.com company.com.answer=42`,
+			stripHost: true,
+		},
+		{
+			entityName: "no-stripping.company.com",
+			metricName: "no-stripping.company.com",
+			expectedBody: `no-stripping,foo=bar,sensu_entity_name=no-stripping.company.com company.com.answer=42`,
+			stripHost: false,
+		},
+		{
+			entityName: "company.com",
+			metricName: "company.com",
+			expectedBody: `company,foo=bar,sensu_entity_name=company.com com.answer=42`,
+			stripHost: false,
+		},
+	}
+
+	for _, tt := range hostStrippingDataSet {
+		assert := assert.New(t)
+		event := corev2.FixtureEvent(tt.entityName, "check1")
+		event.Check = nil
+		event.Metrics = corev2.FixtureMetrics()
+		event.Metrics.Points[0].Name = tt.metricName + ".answer"
+
+		var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			body, _ := ioutil.ReadAll(r.Body)
+			assert.Contains(string(body), tt.expectedBody)
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(`{"ok": true}`))
+			require.NoError(t, err)
+		}))
+
+		config.Addr = apiStub.URL
+		config.StripHost = tt.stripHost
+		err := sendMetrics(event)
+		assert.NoError(err)
+	}
+}
+
 func TestSendAnnotation(t *testing.T) {
 	assert := assert.New(t)
 	event := corev2.FixtureEvent("entity1", "check1")

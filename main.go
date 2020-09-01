@@ -22,6 +22,7 @@ type HandlerConfig struct {
 	Precision          string
 	InsecureSkipVerify bool
 	CheckStatusMetric  bool
+	StripHost          bool
 }
 
 const (
@@ -32,6 +33,7 @@ const (
 	precision          = "precision"
 	insecureSkipVerify = "insecure-skip-verify"
 	checkStatusMetric  = "check-status-metric"
+	stripHost          = "strip-host"
 )
 
 var (
@@ -103,6 +105,14 @@ var (
 			Usage:     "if true, the check status result will be captured as a metric",
 			Value:     &config.CheckStatusMetric,
 		},
+		{
+			Path:      stripHost,
+			Argument:  stripHost,
+			Shorthand: "",
+			Default:   false,
+			Usage:     "if true, we strip the host from the metric",
+			Value:     &config.StripHost,
+		},
 	}
 )
 
@@ -159,6 +169,12 @@ func sendMetrics(event *corev2.Event) error {
 
 	for _, point := range event.Metrics.Points {
 		var tagKey string
+
+		if config.StripHost && strings.HasPrefix(point.Name, event.Entity.Name) {
+			// Adding a char since we also want to strip the dot
+			point.Name = point.Name[len(event.Entity.Name) + 1:]
+		}
+
 		nameField := strings.Split(point.Name, ".")
 		name := nameField[0]
 		if len(nameField) > 1 {
