@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.4.0] - 2020-09-01
+### Added
+- Added support for an optional boolean flag `--strip-host`.
+
 ## [3.3.0] - 2020-06-11
 ### Changed
 - Switched to new community SDK
