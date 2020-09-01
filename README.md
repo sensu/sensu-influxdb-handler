@@ -42,6 +42,7 @@ Flags:
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
   -p, --password string        the password for the given db, defaults to value of INFLUXDB_PASS env variable
       --precision string       the precision value of the metric (default "s")
+      --strip-host             if true, we strip the host from the metric
   -u, --username string        the username for the given db, defaults to value of INFLUXDB_USER env variable
 
 ```
