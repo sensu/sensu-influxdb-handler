@@ -33,7 +33,7 @@ handler.
 Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 
 ## Quick Start
-The quickest way to get started using this handler plugin, is to install via the monitoring-pipelines [PagerDuty template](https://github.com/sensu-community/monitoring-pipelines/blob/master/incident-management/pagerduty.yaml)
+The quickest way to get started using this handler plugin, is to install via the monitoring-pipelines [InfluxDB template](https://github.com/sensu-community/monitoring-pipelines/blob/master/metric-storage/influxdb.yaml)
 The template provides helpful comments concerning supported options, and includes Sensu resource definitions for the handler and the versioned asset you will need.
 You'll want to edit the template to match your configuration before installing with `sensuctl create`.
 
