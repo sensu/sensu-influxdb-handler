@@ -7,7 +7,8 @@
 # Sensu InfluxDB Handler
 
 - [Overview](#overview)
-- [Usage examples](#usage-examples)
+- [Quick start](#quick-start)
+- [Usage description](#usage-description)
 - [Configuration](#configuration)
   - [Asset registration](#asset-registration)
   - [Asset definition](#asset-definition)
@@ -31,8 +32,17 @@ handler.
 
 Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 
-## Usage Examples
+## Quick Start
+The quickest way to get started using this handler plugin, is to install via the monitoring-pipelines [PagerDuty template](https://github.com/sensu-community/monitoring-pipelines/blob/master/incident-management/pagerduty.yaml)
+The template provides helpful comments concerning supported options, and includes Sensu resource definitions for the handler and the versioned asset you will need.
+You'll want to edit the template to match your configuration before installing with `sensuctl create`.
 
+Please note that the monitoring-pipeline abd monitoring-checks templates make use of specially defined handler sets by default. 
+For me information on how the templates work, take a look at the [monitoring pipelines readme](https://github.com/sensu-community/monitoring-pipelines/blob/master/README.md)
+
+
+## Usage Description
+$ sensu-influxdb-handler --help
 Help:
 ```
 Usage:
@@ -52,6 +62,7 @@ Flags:
 ```
 
 ## Configuration
+Note: If you are using the monitoring-plugins template, the template provides the asset and handler resource definitions. Please read the inline comments in the template, for more information on template configuration options.
 
 ### Asset registration
 
@@ -62,7 +73,9 @@ Assets are the best way to make use of this handler. If you're not using an asse
 If you're using an earlier version of sensuctl, you can download the asset definition from [this project's Bonsai Asset Index page](https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler).
 
 
-### Asset definition
+### Asset definition example
+
+Below is an example of a manually created asset definition. You can use this definition with `sensu create` to register a version of this asset without using the bonsai integration.
 
 ```yml
 ---
@@ -70,15 +83,6 @@ type: Asset
 api_version: core/v2
 metadata:
   name: sensu-influxdb-handler_linux_amd64
-  labels: 
-  annotations:
-    io.sensu.bonsai.url: https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler
-    io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/sensu/sensu-influxdb-handler
-    io.sensu.bonsai.tier: Supported
-    io.sensu.bonsai.version: 3.1.2
-    io.sensu.bonsai.namespace: sensu
-    io.sensu.bonsai.name: sensu-influxdb-handler
-    io.sensu.bonsai.tags: ''
 spec:
   url: https://assets.bonsai.sensu.io/b28f8719a48aa8ea80c603f97e402975a98cea47/sensu-influxdb-handler_3.1.2_linux_amd64.tar.gz
   sha512: 612c6ff9928841090c4d23bf20aaf7558e4eed8977a848cf9e2899bb13a13e7540bac2b63e324f39d9b1257bb479676bc155b24e21bf93c722b812b0f15cb3bd
@@ -87,7 +91,7 @@ spec:
   - entity.system.arch == 'amd64'
 ```
 
-### Handler definition
+### Handler definition example
 
 ```yml
 ---
