@@ -1,4 +1,8 @@
-[![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20InfluxDB%20Handler-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler)
+<dir class=badges>
+<a href="https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler">
+ <img src="https://img.shields.io/badge/Sensu%20InfluxDB%20Handler-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu" alt="https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler">
+</a>
+</div>
 
 # Sensu InfluxDB Handler
 
