@@ -70,6 +70,7 @@ var (
 			Argument:  password,
 			Shorthand: "p",
 			Default:   "",
+			Secret:    true,
 			Usage:     "the password for the given db, defaults to value of INFLUXDB_PASS env variable",
 			Value:     &config.Password,
 		},
