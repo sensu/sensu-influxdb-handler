@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Updated to latest SDK and Sensu version
+- Set password to 'Secret: true' to avoid exposing it in help output
+
 ## [3.4.0] - 2020-09-01
 ### Added
 - Added support for an optional boolean flag `--strip-host`.
