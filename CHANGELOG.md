@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.5.0] - 2020-10-20
 ### Changed
 - Updated to latest SDK and Sensu version
 - Set password to 'Secret: true' to avoid exposing it in help output
