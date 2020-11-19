@@ -55,58 +55,58 @@ func TestSendMetrics(t *testing.T) {
 
 func TestSendMetricsHostStripping(t *testing.T) {
 	var hostStrippingDataSet = []struct {
-		entityName string
+		entityName   string
 		expectedBody string
-		metricName string
+		metricName   string
 		stripHost    bool
 	}{
 		{
-			entityName: "sensu.company.com",
-			metricName: "sensu.company.com",
+			entityName:   "sensu.company.com",
+			metricName:   "sensu.company.com",
 			expectedBody: `answer,foo=bar,sensu_entity_name=sensu.company.com value=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "answer.company.com",
-			metricName: "answer.company.com",
+			entityName:   "answer.company.com",
+			metricName:   "answer.company.com",
 			expectedBody: `answer,foo=bar,sensu_entity_name=answer.company.com value=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "prod-eu-db01.company.com",
-			metricName: "prod-eu-db01.company.com",
+			entityName:   "prod-eu-db01.company.com",
+			metricName:   "prod-eu-db01.company.com",
 			expectedBody: `answer,foo=bar,sensu_entity_name=prod-eu-db01.company.com value=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "",
-			metricName: "",
+			entityName:   "",
+			metricName:   "",
 			expectedBody: `answer,foo=bar value=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "metric01",
-			metricName: "",
+			entityName:   "metric01",
+			metricName:   "",
 			expectedBody: `foo=bar,sensu_entity_name=metric01 answer=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "prod-eu-db01.company.com",
-			metricName: "different.company.com",
+			entityName:   "prod-eu-db01.company.com",
+			metricName:   "different.company.com",
 			expectedBody: `different,foo=bar,sensu_entity_name=prod-eu-db01.company.com company.com.answer=42`,
-			stripHost: true,
+			stripHost:    true,
 		},
 		{
-			entityName: "no-stripping.company.com",
-			metricName: "no-stripping.company.com",
+			entityName:   "no-stripping.company.com",
+			metricName:   "no-stripping.company.com",
 			expectedBody: `no-stripping,foo=bar,sensu_entity_name=no-stripping.company.com company.com.answer=42`,
-			stripHost: false,
+			stripHost:    false,
 		},
 		{
-			entityName: "company.com",
-			metricName: "company.com",
+			entityName:   "company.com",
+			metricName:   "company.com",
 			expectedBody: `company,foo=bar,sensu_entity_name=company.com com.answer=42`,
-			stripHost: false,
+			stripHost:    false,
 		},
 	}
 
@@ -172,6 +172,89 @@ func TestEventNeedsAnnotation(t *testing.T) {
 	event.Check = nil
 	b = eventNeedsAnnotation(event)
 	assert.False(b)
+}
+
+func TestSetName(t *testing.T) {
+	var namesDataSet = []struct {
+		test         string
+		pointName    string
+		expectedName string
+		enterprise   bool
+	}{
+		{
+			test:         "enterprise",
+			pointName:    "ram.total.memory",
+			expectedName: "ram.total.memory",
+			enterprise:   true,
+		},
+		{
+			test:         "nonEnterprise",
+			pointName:    "ram.total.memory",
+			expectedName: "ram",
+			enterprise:   false,
+		},
+		{
+			test:         "nonEnterprise2",
+			pointName:    "ram_total_memory",
+			expectedName: "ram_total_memory",
+			enterprise:   false,
+		},
+	}
+
+	for _, nd := range namesDataSet {
+		t.Run(nd.test, func(tt *testing.T) {
+			config.Enterprise = nd.enterprise
+			assert := assert.New(tt)
+
+			n := setName(nd.pointName)
+			assert.Equal(nd.expectedName, n)
+		})
+	}
+}
+
+func TestSetTags(t *testing.T) {
+
+	mt := corev2.MetricTag{Name: "tag1", Value: "value1"}
+	mti := corev2.MetricTag{Name: "tag2", Value: "prod"}
+
+	var tagsDataSet = []struct {
+		test       string
+		entityName string
+		tags       []*corev2.MetricTag
+		expectTags map[string]string
+		enterprise bool
+	}{
+		{
+			test:       "enterprise",
+			entityName: "entity.com",
+			tags:       make([]*corev2.MetricTag, 0),
+			expectTags: map[string]string{"host": "entity.com"},
+			enterprise: true,
+		}, {
+			test:       "noEnterprise",
+			entityName: "entity.com",
+			tags:       make([]*corev2.MetricTag, 0),
+			expectTags: map[string]string{"sensu_entity_name": "entity.com"},
+			enterprise: false,
+		},
+		{
+			test:       "noEnterprise_tags",
+			entityName: "entity.com",
+			tags:       []*corev2.MetricTag{&mt, &mti},
+			expectTags: map[string]string{"sensu_entity_name": "entity.com", "tag2": "prod", "tag1": "value1"},
+			enterprise: false,
+		},
+	}
+
+	for _, td := range tagsDataSet {
+		t.Run(td.test, func(tt *testing.T) {
+			config.Enterprise = td.enterprise
+			assert := assert.New(tt)
+
+			tags := setTags(td.entityName, td.tags)
+			assert.Equal(td.expectTags, tags)
+		})
+	}
 }
 
 func TestMain(t *testing.T) {

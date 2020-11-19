@@ -38,6 +38,7 @@ Flags:
   -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
   -c, --check-status-metric    if true, the check status result will be captured as a metric
   -d, --db-name string         the influxdb to send metrics to
+  -e, --enterprise             if true, parse the metric w/ original enterprise format
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
   -p, --password string        the password for the given db, defaults to value of INFLUXDB_PASS env variable
@@ -51,7 +52,7 @@ Flags:
 
 ### Asset registration
 
-Assets are the best way to make use of this handler. If you're not using an asset, please consider doing so! If you're using sensuctl 5.13 or later, you can use the following command to add the asset: 
+Assets are the best way to make use of this handler. If you're not using an asset, please consider doing so! If you're using sensuctl 5.13 or later, you can use the following command to add the asset:
 
 `sensuctl asset add sensu/sensu-influxdb-handler`
 
@@ -66,7 +67,7 @@ type: Asset
 api_version: core/v2
 metadata:
   name: sensu-influxdb-handler_linux_amd64
-  labels: 
+  labels:
   annotations:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler
     io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/sensu/sensu-influxdb-handler

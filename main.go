@@ -23,6 +23,7 @@ type HandlerConfig struct {
 	InsecureSkipVerify bool
 	CheckStatusMetric  bool
 	StripHost          bool
+	Enterprise         bool
 }
 
 const (
@@ -34,6 +35,7 @@ const (
 	insecureSkipVerify = "insecure-skip-verify"
 	checkStatusMetric  = "check-status-metric"
 	stripHost          = "strip-host"
+	enterprise         = "enterprise"
 )
 
 var (
@@ -114,6 +116,14 @@ var (
 			Usage:     "if true, we strip the host from the metric",
 			Value:     &config.StripHost,
 		},
+		{
+			Path:      enterprise,
+			Argument:  enterprise,
+			Shorthand: "e",
+			Default:   false,
+			Usage:     "if true, parse the metric w/ original enterprise format",
+			Value:     &config.Enterprise,
+		},
 	}
 )
 
@@ -169,35 +179,22 @@ func sendMetrics(event *corev2.Event) error {
 	}
 
 	for _, point := range event.Metrics.Points {
-		var tagKey string
 
 		if config.StripHost && strings.HasPrefix(point.Name, event.Entity.Name) {
 			// Adding a char since we also want to strip the dot
-			point.Name = point.Name[len(event.Entity.Name) + 1:]
+			point.Name = point.Name[len(event.Entity.Name)+1:]
 		}
 
-		nameField := strings.Split(point.Name, ".")
-		name := nameField[0]
-		if len(nameField) > 1 {
-			tagKey = strings.Join(nameField[1:], ".")
-		} else {
-			tagKey = "value"
-		}
-		fields := map[string]interface{}{tagKey: point.Value}
-		stringTimestamp := strconv.FormatInt(point.Timestamp, 10)
-		if len(stringTimestamp) > 10 {
-			stringTimestamp = stringTimestamp[:10]
-		}
-		t, err := strconv.ParseInt(stringTimestamp, 10, 64)
+		name := setName(point.Name)
+
+		fields := setFields(point.Name, point.Value)
+
+		timestamp, err := setTime(point.Timestamp)
 		if err != nil {
 			return err
 		}
-		timestamp := time.Unix(t, 0)
-		tags := make(map[string]string)
-		tags["sensu_entity_name"] = event.Entity.Name
-		for _, tag := range point.Tags {
-			tags[tag.Name] = tag.Value
-		}
+
+		tags := setTags(event.Entity.Name, point.Tags)
 
 		pt, err = client.NewPoint(name, tags, fields, timestamp)
 		if err != nil {
@@ -265,4 +262,64 @@ func eventNeedsAnnotation(event *corev2.Event) bool {
 
 	// Status 0, but first occurrence so it's a resolution, assumed
 	return true
+}
+
+// set tagkey name
+func setFields(name string, value interface{}) map[string]interface{} {
+	fields := make(map[string]interface{})
+	//Enterprise always uses value as the key
+	if config.Enterprise {
+		fields["value"] = value
+		return fields
+	}
+
+	nameField := strings.Split(name, ".")
+	// names with '.', use first part as measurement name and rest as key for the value
+	if len(nameField) > 1 {
+		fields[strings.Join(nameField[1:], ".")] = value
+		return fields
+	}
+
+	fields["value"] = value
+	return fields
+}
+
+func setTags(name string, tags []*corev2.MetricTag) map[string]string {
+	ntags := make(map[string]string)
+
+	if config.Enterprise {
+		ntags["host"] = name
+	} else {
+		ntags["sensu_entity_name"] = name
+	}
+
+	for _, tag := range tags {
+		ntags[tag.Name] = tag.Value
+	}
+
+	return ntags
+}
+
+func setTime(timestamp int64) (time.Time, error) {
+	stringTimestamp := strconv.FormatInt(timestamp, 10)
+	if len(stringTimestamp) > 10 {
+		stringTimestamp = stringTimestamp[:10]
+	}
+	t, err := strconv.ParseInt(stringTimestamp, 10, 64)
+	if err != nil {
+		return time.Now(), err
+	}
+
+	return time.Unix(t, 0), nil
+}
+
+// set mesurement name
+func setName(name string) string {
+	//Enterprise always returns full name
+	if config.Enterprise {
+		return name
+	}
+
+	// if name includes '.' then only the first one is used
+	return strings.Split(name, ".")[0]
 }
