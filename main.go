@@ -23,7 +23,7 @@ type HandlerConfig struct {
 	InsecureSkipVerify bool
 	CheckStatusMetric  bool
 	StripHost          bool
-	Enterprise         bool
+	Legacy             bool
 }
 
 const (
@@ -35,7 +35,7 @@ const (
 	insecureSkipVerify = "insecure-skip-verify"
 	checkStatusMetric  = "check-status-metric"
 	stripHost          = "strip-host"
-	enterprise         = "enterprise"
+	legacy             = "legacy-format"
 )
 
 var (
@@ -117,12 +117,12 @@ var (
 			Value:     &config.StripHost,
 		},
 		{
-			Path:      enterprise,
-			Argument:  enterprise,
-			Shorthand: "e",
+			Path:      legacy,
+			Argument:  legacy,
+			Shorthand: "l",
 			Default:   false,
-			Usage:     "if true, parse the metric w/ original enterprise format",
-			Value:     &config.Enterprise,
+			Usage:     "if true, parse the metric w/ legacy format",
+			Value:     &config.Legacy,
 		},
 	}
 )
@@ -267,8 +267,8 @@ func eventNeedsAnnotation(event *corev2.Event) bool {
 // set tagkey name
 func setFields(name string, value interface{}) map[string]interface{} {
 	fields := make(map[string]interface{})
-	//Enterprise always uses value as the key
-	if config.Enterprise {
+	//Legacy always uses value as the key
+	if config.Legacy {
 		fields["value"] = value
 		return fields
 	}
@@ -287,7 +287,7 @@ func setFields(name string, value interface{}) map[string]interface{} {
 func setTags(name string, tags []*corev2.MetricTag) map[string]string {
 	ntags := make(map[string]string)
 
-	if config.Enterprise {
+	if config.Legacy {
 		ntags["host"] = name
 	} else {
 		ntags["sensu_entity_name"] = name
@@ -315,8 +315,8 @@ func setTime(timestamp int64) (time.Time, error) {
 
 // set mesurement name
 func setName(name string) string {
-	//Enterprise always returns full name
-	if config.Enterprise {
+	//Legacy always returns full name
+	if config.Legacy {
 		return name
 	}
 

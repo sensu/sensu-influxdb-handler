@@ -179,31 +179,31 @@ func TestSetName(t *testing.T) {
 		test         string
 		pointName    string
 		expectedName string
-		enterprise   bool
+		legacy       bool
 	}{
 		{
-			test:         "enterprise",
+			test:         "legacy",
 			pointName:    "ram.total.memory",
 			expectedName: "ram.total.memory",
-			enterprise:   true,
+			legacy:       true,
 		},
 		{
-			test:         "nonEnterprise",
+			test:         "nonLegacy",
 			pointName:    "ram.total.memory",
 			expectedName: "ram",
-			enterprise:   false,
+			legacy:       false,
 		},
 		{
-			test:         "nonEnterprise2",
+			test:         "nonLegacy2",
 			pointName:    "ram_total_memory",
 			expectedName: "ram_total_memory",
-			enterprise:   false,
+			legacy:       false,
 		},
 	}
 
 	for _, nd := range namesDataSet {
 		t.Run(nd.test, func(tt *testing.T) {
-			config.Enterprise = nd.enterprise
+			config.Legacy = nd.legacy
 			assert := assert.New(tt)
 
 			n := setName(nd.pointName)
@@ -222,33 +222,33 @@ func TestSetTags(t *testing.T) {
 		entityName string
 		tags       []*corev2.MetricTag
 		expectTags map[string]string
-		enterprise bool
+		legacy     bool
 	}{
 		{
-			test:       "enterprise",
+			test:       "legacy",
 			entityName: "entity.com",
 			tags:       make([]*corev2.MetricTag, 0),
 			expectTags: map[string]string{"host": "entity.com"},
-			enterprise: true,
+			legacy:     true,
 		}, {
-			test:       "noEnterprise",
+			test:       "noLegacy",
 			entityName: "entity.com",
 			tags:       make([]*corev2.MetricTag, 0),
 			expectTags: map[string]string{"sensu_entity_name": "entity.com"},
-			enterprise: false,
+			legacy:     false,
 		},
 		{
-			test:       "noEnterprise_tags",
+			test:       "noLegacy_tags",
 			entityName: "entity.com",
 			tags:       []*corev2.MetricTag{&mt, &mti},
 			expectTags: map[string]string{"sensu_entity_name": "entity.com", "tag2": "prod", "tag1": "value1"},
-			enterprise: false,
+			legacy:     false,
 		},
 	}
 
 	for _, td := range tagsDataSet {
 		t.Run(td.test, func(tt *testing.T) {
-			config.Enterprise = td.enterprise
+			config.Legacy = td.legacy
 			assert := assert.New(tt)
 
 			tags := setTags(td.entityName, td.tags)
