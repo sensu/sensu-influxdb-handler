@@ -40,6 +40,7 @@ Flags:
   -d, --db-name string         the influxdb to send metrics to
   -h, --help                   help for sensu-influxdb-handler
   -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
+  -l, --legacy-format          if true, parse the metric w/ legacy format
   -p, --password string        the password for the given db, defaults to value of INFLUXDB_PASS env variable
       --precision string       the precision value of the metric (default "s")
       --strip-host             if true, we strip the host from the metric
@@ -47,11 +48,26 @@ Flags:
 
 ```
 
+### Formatting options
+
+Default formatting: If the measurement is separated by `.` (period), takes the fist word as the measurement and subsequent word(s) as the field_set key. If there are no `.` then the measurement is taken as is and the field_set key is "value".
+
+To change this default behavior there are 2 flags that can be used.
+
+* `-l, --legacy-format` Keeps all elements of the measurement with no splitting and the key will always be "value". Also replaces the default tag key "sensu_entity_name" with "host".
+* `--strip-host` Some metric checks put a hostname prefix to the measurement. This will strip it off for you without having to edit the check output. Used alone the default behavior will split the 2nd word element (if using `.` seperators) as the measurement.
+
+These 2 flags can be used in concert, which would strip off the hostname but then keep the rest of the measurement as is.
+
+
+
+
+
 ## Configuration
 
 ### Asset registration
 
-Assets are the best way to make use of this handler. If you're not using an asset, please consider doing so! If you're using sensuctl 5.13 or later, you can use the following command to add the asset: 
+Assets are the best way to make use of this handler. If you're not using an asset, please consider doing so! If you're using sensuctl 5.13 or later, you can use the following command to add the asset:
 
 `sensuctl asset add sensu/sensu-influxdb-handler`
 
@@ -66,7 +82,7 @@ type: Asset
 api_version: core/v2
 metadata:
   name: sensu-influxdb-handler_linux_amd64
-  labels: 
+  labels:
   annotations:
     io.sensu.bonsai.url: https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler
     io.sensu.bonsai.api_url: https://bonsai.sensu.io/api/v1/assets/sensu/sensu-influxdb-handler
