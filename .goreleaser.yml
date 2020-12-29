@@ -29,7 +29,6 @@ builds:
         goarch: arm
     targets:
       - darwin_amd64
-      - darwin_386
       - linux_386
       - linux_amd64
       - linux_arm_5
