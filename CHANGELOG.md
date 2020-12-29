@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.6.0] - 2020-12-29
+### Added
+- Added support for legacy functionality via flag `--legacy-format`
+
+### Removed
+- Build for darwin/386
+
 ## [3.5.0] - 2020-10-20
 ### Changed
 - Updated to latest SDK and Sensu version
