@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.6.1] - 2021-01-14
 ### Changed
 - Removed darwin_386 from .bonsai.yml
 
