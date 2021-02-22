@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Q1 '21 handler maintenance:
+  - Updated GitHub Actions: Added Lint action
+  - Updated build to Go 1.14
+  - Updated modules (go get -u && go mod tidy)
+  - README updates
+
 ## [3.6.1] - 2021-01-14
 ### Changed
 - Removed darwin_386 from .bonsai.yml
