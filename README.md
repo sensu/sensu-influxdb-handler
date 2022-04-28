@@ -12,9 +12,8 @@
   - [Asset registration](#asset-registration)
   - [Asset definition](#asset-definition)
   - [Handler definition](#handler-definition)
-  - [Check manifest](#check-manifest)
-- [InfluxCompatibility]
-
+  - [Check definition](#check-definition)
+- [InfluxDBv2 compatibility](#influxdbv2-compatibility)
 - [Installation from source and contributing](#installation-from-source-and-contributing)
 
 ## Overview
@@ -192,7 +191,7 @@ Ref: https://docs.influxdata.com/influxdb/v2.0/tools/grafana/?t=InfluxQL#view-an
 When using InfluxQL to query InfluxDB, the query must specify a database and a retention policy. InfluxDB DBRP mappings associate database and retention policy combinations with InfluxDB 2.0 buckets. DBRP mappings do not affect the retention period of the target bucket. These mappings allow queries following InfluxDB 1.x conventions to successfully query InfluxDB 2.0 buckets.
 
 
-## Installing from source and contributing
+## Installation from source and contributing
 
 Download the latest version of the sensu-influxdb-handler from [releases][4],
 or create an executable from this source.
