@@ -13,6 +13,8 @@
   - [Asset definition](#asset-definition)
   - [Handler definition](#handler-definition)
   - [Check manifest](#check-manifest)
+- [InfluxCompatibility]
+
 - [Installation from source and contributing](#installation-from-source-and-contributing)
 
 ## Overview
@@ -181,6 +183,14 @@ Graphite, OpenTSDB, Nagios, etc.), Sensu will extract and transform
 them, and this handler will populate them into your InfluxDB.
 
 **Security Note:** The InfluxDB addr, username and password are treated as a security sensitive configuration options in this example and are loaded into the handler config as env_vars instead of as a command arguments. Command arguments are commonly readable from the process table by other unprivileged users on a system (ex: `ps` and `top` commands), so it's a better practice to read in sensitive information via environment variables or configuration files as part of command execution. The command flags for these configuration options are provided as an override for testing purposes.
+
+## InfluxDBv2 Compatibility
+This plugin was written for InfluxDB 1.x databases, but it is possible to have it work with InfluxDB 2.0 buckets by configuring an Influx DBRP mapping in your InfluxDB 2.0 server. 
+
+Ref: https://docs.influxdata.com/influxdb/v2.0/tools/grafana/?t=InfluxQL#view-and-create-influxdb-dbrp-mappings
+
+When using InfluxQL to query InfluxDB, the query must specify a database and a retention policy. InfluxDB DBRP mappings associate database and retention policy combinations with InfluxDB 2.0 buckets. DBRP mappings do not affect the retention period of the target bucket. These mappings allow queries following InfluxDB 1.x conventions to successfully query InfluxDB 2.0 buckets.
+
 
 ## Installing from source and contributing
 
