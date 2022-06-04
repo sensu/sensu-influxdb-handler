@@ -1,21 +1,25 @@
 package main
 
 import (
-	"errors"
+	"crypto/tls"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	client "github.com/influxdata/influxdb1-client/v2"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/sensu-community/sensu-plugin-sdk/sensu"
+
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
 
 // HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
-	Addr               string
+	URL                string
+	Token              string
+	Bucket             string
+	Org                string
 	Username           string
 	Password           string
 	DbName             string
@@ -25,18 +29,6 @@ type HandlerConfig struct {
 	StripHost          bool
 	Legacy             bool
 }
-
-const (
-	addr               = "addr"
-	username           = "username"
-	password           = "password"
-	dbName             = "db-name"
-	precision          = "precision"
-	insecureSkipVerify = "insecure-skip-verify"
-	checkStatusMetric  = "check-status-metric"
-	stripHost          = "strip-host"
-	legacy             = "legacy-format"
-)
 
 var (
 	config = HandlerConfig{
@@ -49,79 +41,109 @@ var (
 
 	influxdbConfigOptions = []*sensu.PluginConfigOption{
 		{
-			Path:      addr,
-			Env:       "INFLUXDB_ADDR",
-			Argument:  addr,
-			Shorthand: "a",
+			Path:      "url",
+			Env:       "INFLUXDB_URL",
+			Argument:  "url",
+			Shorthand: "u",
 			Default:   "http://localhost:8086",
-			Usage:     "the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
-			Value:     &config.Addr,
+			Usage:     "the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_URL env variable",
+			Value:     &config.URL,
 		},
 		{
-			Path:      username,
+			Path:      "token",
+			Env:       "INFLUXDB_TOKEN",
+			Argument:  "token",
+			Shorthand: "t",
+			Default:   "",
+			Usage:     "the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility",
+			Value:     &config.Token,
+			Secret:    true,
+		},
+		{
+			Path:      "bucket",
+			Env:       "INFLUXDB_BUCKET",
+			Argument:  "bucket",
+			Shorthand: "b",
+			Default:   "",
+			Usage:     "the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility",
+			Value:     &config.Bucket,
+			Secret:    true,
+		},
+		{
+			Path:      "org",
+			Env:       "INFLUXDB_ORG",
+			Argument:  "org",
+			Shorthand: "o",
+			Default:   "",
+			Usage:     "the influxdbv2 org, leave empty for influxdb v1.8 compatibility",
+			Value:     &config.Org,
+			Secret:    true,
+		},
+		{
+			Path:      "username",
 			Env:       "INFLUXDB_USER",
-			Argument:  username,
+			Argument:  "username",
 			Shorthand: "u",
 			Default:   "",
-			Usage:     "the username for the given db, defaults to value of INFLUXDB_USER env variable",
+			Usage:     "(Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token",
 			Value:     &config.Username,
 		},
 		{
-			Path:      password,
+			Path:      "password",
 			Env:       "INFLUXDB_PASS",
-			Argument:  password,
+			Argument:  "password",
 			Shorthand: "p",
 			Default:   "",
 			Secret:    true,
-			Usage:     "the password for the given db, defaults to value of INFLUXDB_PASS env variable",
+			Usage:     "(Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token",
 			Value:     &config.Password,
 		},
 		{
-			Path:      dbName,
-			Argument:  dbName,
+			Path:      "dbName",
+			Argument:  "dbName",
 			Shorthand: "d",
 			Default:   "",
-			Usage:     "the influxdb to send metrics to",
+			Usage:     "(Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name",
 			Value:     &config.DbName,
 		},
 		{
-			Path:      precision,
-			Argument:  precision,
+			Path:      "precision",
+			Argument:  "precision",
 			Shorthand: "",
 			Default:   "s",
 			Usage:     "the precision value of the metric",
 			Value:     &config.Precision,
 		},
 		{
-			Path:      insecureSkipVerify,
-			Argument:  insecureSkipVerify,
+			Path:      "insecureSkipVerify",
+			Argument:  "insecureSkipVerify",
 			Shorthand: "i",
 			Default:   false,
 			Usage:     "if true, the influx client skips https certificate verification",
 			Value:     &config.InsecureSkipVerify,
 		},
 		{
-			Path:      checkStatusMetric,
-			Argument:  checkStatusMetric,
+			Path:      "checkStatusMetric",
+			Argument:  "checkStatusMetric",
 			Shorthand: "c",
 			Default:   false,
 			Usage:     "if true, the check status result will be captured as a metric",
 			Value:     &config.CheckStatusMetric,
 		},
 		{
-			Path:      stripHost,
-			Argument:  stripHost,
+			Path:      "stripHost",
+			Argument:  "stripHost",
 			Shorthand: "",
 			Default:   false,
 			Usage:     "if true, we strip the host from the metric",
 			Value:     &config.StripHost,
 		},
 		{
-			Path:      legacy,
-			Argument:  legacy,
+			Path:      "legacy",
+			Argument:  "legacy",
 			Shorthand: "l",
 			Default:   false,
-			Usage:     "if true, parse the metric w/ legacy format",
+			Usage:     "(Deprecated) if true, parse the metric w/ legacy format",
 			Value:     &config.Legacy,
 		},
 	}
@@ -133,9 +155,17 @@ func main() {
 }
 
 func checkArgs(event *corev2.Event) error {
-	if len(config.DbName) == 0 {
-		return errors.New("missing db name")
-	}
+	/* TODO:
+	check if bucket is empty or dbName is empty -> one must be non empty string
+	check if both bucket and dbName are provided -> illegal
+	populate bucket from dbName if required
+
+	if token empty check if user/pass are empty populate token from user/pass
+	illegal if token is empty
+
+
+	*/
+
 	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
 	}
@@ -143,26 +173,26 @@ func checkArgs(event *corev2.Event) error {
 }
 
 func sendMetrics(event *corev2.Event) error {
-	var pt *client.Point
-	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:               config.Addr,
-		Username:           config.Username,
-		Password:           config.Password,
-		InsecureSkipVerify: config.InsecureSkipVerify,
-	})
-	if err != nil {
-		return err
-	}
+	var writeErrors []error
+	c := influxdb2.NewClientWithOptions(
+		config.URL,
+		config.Token,
+		influxdb2.DefaultOptions().
+			SetTLSConfig(&tls.Config{
+				InsecureSkipVerify: config.InsecureSkipVerify,
+			}))
 	defer c.Close()
-
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  config.DbName,
-		Precision: config.Precision,
-	})
-	if err != nil {
-		return err
-	}
-
+	// Get non-blocking write client
+	writeAPI := c.WriteAPI(config.Org, config.Bucket)
+	defer writeAPI.Flush()
+	// Get errors channel
+	errorsCh := writeAPI.Errors()
+	// Create go proc for reading and logging errors
+	go func() {
+		for err := range errorsCh {
+			writeErrors = append(writeErrors, err)
+		}
+	}()
 	// Add the check status field as a metric if requested. Measurement recorded as the check name.
 	if config.CheckStatusMetric && event.HasCheck() {
 		var statusMetric = &corev2.MetricPoint{
@@ -196,11 +226,8 @@ func sendMetrics(event *corev2.Event) error {
 
 		tags := setTags(event.Entity.Name, point.Tags)
 
-		pt, err = client.NewPoint(name, tags, fields, timestamp)
-		if err != nil {
-			return err
-		}
-		bp.AddPoint(pt)
+		pt := influxdb2.NewPoint(name, tags, fields, timestamp)
+		writeAPI.WritePoint(pt)
 	}
 
 	// 1.x handler parity
@@ -229,18 +256,12 @@ func sendMetrics(event *corev2.Event) error {
 		}
 		timestamp := time.Unix(t, 0)
 
-		pt, err = client.NewPoint("sensu_event", tags, fields, timestamp)
-		if err != nil {
-			return err
-		}
-		bp.AddPoint(pt)
+		pt := influxdb2.NewPoint("sensu_event", tags, fields, timestamp)
+		writeAPI.WritePoint(pt)
 	}
-
-	if err = c.Write(bp); err != nil {
-		return err
-	}
-
-	return c.Close()
+	writeAPI.Flush()
+	c.Close()
+	return nil
 }
 
 // Determine if an event needs an annotation
