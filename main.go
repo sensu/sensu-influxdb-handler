@@ -2,13 +2,14 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/sensu-community/sensu-plugin-sdk/sensu"
+	"github.com/sensu/sensu-plugin-sdk/sensu"
 
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
@@ -16,7 +17,7 @@ import (
 // HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
-	URL                string
+	Addr               string
 	Token              string
 	Bucket             string
 	Org                string
@@ -39,17 +40,17 @@ var (
 		},
 	}
 
-	influxdbConfigOptions = []*sensu.PluginConfigOption{
-		{
-			Path:      "url",
-			Env:       "INFLUXDB_URL",
-			Argument:  "url",
-			Shorthand: "u",
+	influxdbConfigOptions = []sensu.ConfigOption{
+		&sensu.PluginConfigOption[string]{
+			Path:      "addr",
+			Env:       "INFLUXDB_ADDR",
+			Argument:  "addr",
+			Shorthand: "a",
 			Default:   "http://localhost:8086",
-			Usage:     "the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_URL env variable",
-			Value:     &config.URL,
+			Usage:     "the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
+			Value:     &config.Addr,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "token",
 			Env:       "INFLUXDB_TOKEN",
 			Argument:  "token",
@@ -59,7 +60,7 @@ var (
 			Value:     &config.Token,
 			Secret:    true,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "bucket",
 			Env:       "INFLUXDB_BUCKET",
 			Argument:  "bucket",
@@ -69,7 +70,7 @@ var (
 			Value:     &config.Bucket,
 			Secret:    true,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "org",
 			Env:       "INFLUXDB_ORG",
 			Argument:  "org",
@@ -79,7 +80,7 @@ var (
 			Value:     &config.Org,
 			Secret:    true,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "username",
 			Env:       "INFLUXDB_USER",
 			Argument:  "username",
@@ -88,7 +89,7 @@ var (
 			Usage:     "(Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token",
 			Value:     &config.Username,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "password",
 			Env:       "INFLUXDB_PASS",
 			Argument:  "password",
@@ -98,7 +99,7 @@ var (
 			Usage:     "(Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token",
 			Value:     &config.Password,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "dbName",
 			Argument:  "dbName",
 			Shorthand: "d",
@@ -106,7 +107,7 @@ var (
 			Usage:     "(Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name",
 			Value:     &config.DbName,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      "precision",
 			Argument:  "precision",
 			Shorthand: "",
@@ -114,7 +115,7 @@ var (
 			Usage:     "the precision value of the metric",
 			Value:     &config.Precision,
 		},
-		{
+		&sensu.PluginConfigOption[bool]{
 			Path:      "insecureSkipVerify",
 			Argument:  "insecureSkipVerify",
 			Shorthand: "i",
@@ -122,7 +123,7 @@ var (
 			Usage:     "if true, the influx client skips https certificate verification",
 			Value:     &config.InsecureSkipVerify,
 		},
-		{
+		&sensu.PluginConfigOption[bool]{
 			Path:      "checkStatusMetric",
 			Argument:  "checkStatusMetric",
 			Shorthand: "c",
@@ -130,7 +131,7 @@ var (
 			Usage:     "if true, the check status result will be captured as a metric",
 			Value:     &config.CheckStatusMetric,
 		},
-		{
+		&sensu.PluginConfigOption[bool]{
 			Path:      "stripHost",
 			Argument:  "stripHost",
 			Shorthand: "",
@@ -138,7 +139,7 @@ var (
 			Usage:     "if true, we strip the host from the metric",
 			Value:     &config.StripHost,
 		},
-		{
+		&sensu.PluginConfigOption[bool]{
 			Path:      "legacy",
 			Argument:  "legacy",
 			Shorthand: "l",
@@ -155,17 +156,31 @@ func main() {
 }
 
 func checkArgs(event *corev2.Event) error {
-	/* TODO:
-	check if bucket is empty or dbName is empty -> one must be non empty string
-	check if both bucket and dbName are provided -> illegal
-	populate bucket from dbName if required
+	if len(config.Addr) == 0 {
+		return errors.New("--address must be provided\n")
+	}
+	if len(config.Bucket) > 0 && len(config.DbName) > 0 {
+		return errors.New("Cannot set both --bucket and --dbName\n")
+	}
+	if len(config.Bucket) == 0 && len(config.DbName) == 0 {
+		return errors.New("Must specify either --bucket or --dbName\n")
+	}
 
-	if token empty check if user/pass are empty populate token from user/pass
-	illegal if token is empty
-
-
-	*/
-
+	if len(config.Bucket) == 0 {
+		if len(config.DbName) > 0 {
+			config.Bucket = config.DbName
+		}
+	}
+	if len(config.Token) == 0 {
+		token := ""
+		if len(config.Username) > 0 {
+			token = token + string(config.Username) + ":"
+		}
+		if len(config.Password) > 0 {
+			token = token + string(config.Password)
+		}
+		config.Token = token
+	}
 	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
 	}
@@ -175,7 +190,7 @@ func checkArgs(event *corev2.Event) error {
 func sendMetrics(event *corev2.Event) error {
 	var writeErrors []error
 	c := influxdb2.NewClientWithOptions(
-		config.URL,
+		config.Addr,
 		config.Token,
 		influxdb2.DefaultOptions().
 			SetTLSConfig(&tls.Config{
@@ -259,8 +274,8 @@ func sendMetrics(event *corev2.Event) error {
 		pt := influxdb2.NewPoint("sensu_event", tags, fields, timestamp)
 		writeAPI.WritePoint(pt)
 	}
-	writeAPI.Flush()
-	c.Close()
+	//writeAPI.Flush()
+	//c.Close()
 	return nil
 }
 
