@@ -15,6 +15,16 @@ import (
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
 
+type errSlice []error
+
+func (eSlice errSlice) Error() string {
+	var eStrings []string
+	for _, e := range eSlice {
+		eStrings = append(eStrings, e.Error())
+	}
+	return strings.Join(eStrings, "\n")
+}
+
 // HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
@@ -159,16 +169,8 @@ var (
 )
 
 func main() {
-	useStdin, err := testStdin()
-	if err != nil {
-		panic(err)
-	}
-	if useStdin {
-		goHandler := sensu.NewHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
-		goHandler.Execute()
-	} else {
-		panic(fmt.Errorf("Must supply Sensu event json on stdin\n"))
-	}
+	goHandler := sensu.NewHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
+	goHandler.Execute()
 }
 
 func testStdin() (bool, error) {
@@ -226,7 +228,6 @@ func checkArgs(event *corev2.Event) error {
 }
 
 func sendMetrics(event *corev2.Event) error {
-	return nil
 	var writeErrors []error
 	c := influxdb2.NewClientWithOptions(
 		config.Addr,
@@ -239,7 +240,7 @@ func sendMetrics(event *corev2.Event) error {
 	defer c.Close()
 	// Get non-blocking write client
 	writeAPI := c.WriteAPI(config.Org, config.Bucket)
-	defer writeAPI.Flush()
+	//defer writeAPI.Flush()
 	// Get errors channel
 	errorsCh := writeAPI.Errors()
 	// Create go proc for reading and logging errors
@@ -280,14 +281,14 @@ func sendMetrics(event *corev2.Event) error {
 		}
 
 		tags := setTags(event.Entity.Name, point.Tags)
-
-		pt := influxdb2.NewPoint(name, tags, fields, timestamp)
-		writeAPI.WritePoint(pt)
+		if len(name) > 0 {
+			pt := influxdb2.NewPoint(name, tags, fields, timestamp)
+			writeAPI.WritePoint(pt)
+		}
 	}
 
 	// 1.x handler parity
 	annotate := eventNeedsAnnotation(event)
-
 	if annotate {
 		tags := make(map[string]string)
 		tags["entity"] = event.Entity.Name
@@ -296,10 +297,10 @@ func sendMetrics(event *corev2.Event) error {
 		title := fmt.Sprintf("%q", "Sensu Event")
 		description := fmt.Sprintf("%q", sensu.FormattedMessage(event))
 		fields := make(map[string]interface{})
-		fields["title"] = title
-		fields["description"] = description
-		fields["status"] = event.Check.Status
-		fields["occurrences"] = event.Check.Occurrences
+		fields["title"] = string(title)                      //explicit cast to string to prevent influx client error
+		fields["description"] = string(description)          //explicit cast to string to prevent influx client error
+		fields["status"] = int(event.Check.Status)           //explicit cast to int to prevent influx client error
+		fields["occurrences"] = int(event.Check.Occurrences) //explicit cast int to prevent influx client error
 
 		stringTimestamp := strconv.FormatInt(event.Timestamp, 10)
 		if len(stringTimestamp) > 10 {
@@ -314,8 +315,12 @@ func sendMetrics(event *corev2.Event) error {
 		pt := influxdb2.NewPoint("sensu_event", tags, fields, timestamp)
 		writeAPI.WritePoint(pt)
 	}
-	//writeAPI.Flush()
-	//c.Close()
+	writeAPI.Flush()
+	time.Sleep(time.Second)
+	if len(writeErrors) > 0 {
+		return errSlice(writeErrors)
+	}
+	c.Close()
 	return nil
 }
 

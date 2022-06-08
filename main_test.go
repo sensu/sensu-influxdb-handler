@@ -174,7 +174,7 @@ func TestSendAnnotation(t *testing.T) {
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
-		expectedBody := `sensu_event,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1u,title="\"Sensu Event\""`
+		expectedBody := `sensu_event,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1i,title="\"Sensu Event\""`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(`{"ok": true}`))
