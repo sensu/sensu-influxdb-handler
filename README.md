@@ -1,6 +1,6 @@
 [![Bonsai Asset Badge](https://img.shields.io/badge/Sensu%20InfluxDB%20Handler-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/sensu/sensu-influxdb-handler)
 
-# Sensu InfluxDB Handler
+# Sensu InfluxDBv2 Handler
 
 - [Overview](#overview)
 - [Usage examples](#usage-examples)
@@ -19,7 +19,7 @@
 ## Overview
 
 The Sensu InfluxDB Handler is a [Sensu Event Handler][3] that sends metrics to
-the time series database [InfluxDB][2]. [Sensu][1] can collect metrics using
+the time series database [InfluxDBv2][2]. [Sensu][1] can collect metrics using
 check output metric extraction or the StatsD listener. Those collected metrics
 pass through the event pipeline, allowing Sensu to deliver the metrics to the
 configured metric event handlers. This InfluxDB handler will allow you to
@@ -40,17 +40,19 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string            the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
-  -c, --check-status-metric    if true, the check status result will be captured as a metric
-  -d, --db-name string         the influxdb to send metrics to
-  -h, --help                   help for sensu-influxdb-handler
-  -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
-  -l, --legacy-format          if true, parse the metric w/ legacy format
-  -p, --password string        the password for the given db, defaults to value of INFLUXDB_PASS env variable
-      --precision string       the precision value of the metric (default "s")
-      --strip-host             if true, we strip the host from the metric
-  -u, --username string        the username for the given db, defaults to value of INFLUXDB_USER env variable
-
+  -a, --addr string          the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
+  -b, --bucket string        the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility
+  -c, --checkStatusMetric    if true, the check status result will be captured as a metric
+  -d, --dbName string        (Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name
+  -h, --help                 help for sensu-influxdb-handler
+  -i, --insecureSkipVerify   if true, the influx client skips https certificate verification
+  -l, --legacy               (Deprecated) if true, parse the metric w/ legacy format
+  -o, --org string           the influxdbv2 org, leave empty for influxdb v1.8 compatibility
+  -p, --password string      (Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token
+      --precision string     the precision value of the metric (default "s")
+      --stripHost            if true, we strip the host from the metric
+  -t, --token string         the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility
+  -u, --username string      (Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token
 ```
 
 ### Environment variables
@@ -60,6 +62,9 @@ Flags:
 |--addr     |INFLUXDB_ADDR        |
 |--username |INFLUXDB_USER        |
 |--password |INFLUXDB_PASS        |
+|--bucket   |INFLUXDB_BUCKET      |
+|--token    |INFLUXDB_TOKEN       |
+|--org      |INFLUXDB_ORG         |
 
 **Security Note:** Care should be taken to not expose the password for this handler by specifying it
 on the command line or by directly setting the environment variable in the handler definition.  It is
@@ -183,13 +188,12 @@ them, and this handler will populate them into your InfluxDB.
 
 **Security Note:** The InfluxDB addr, username and password are treated as a security sensitive configuration options in this example and are loaded into the handler config as env_vars instead of as a command arguments. Command arguments are commonly readable from the process table by other unprivileged users on a system (ex: `ps` and `top` commands), so it's a better practice to read in sensitive information via environment variables or configuration files as part of command execution. The command flags for these configuration options are provided as an override for testing purposes.
 
-## InfluxDBv2 Compatibility
-This plugin was written for InfluxDB 1.x databases, but it is possible to have it work with InfluxDB 2.0 buckets by configuring an Influx DBRP mapping in your InfluxDB 2.0 server. 
+## InfluxDBv1.8 Compatibility
+It's possible to use this plugin with InfluxDB v1.8 by specifying the approporate compatible bucket and token values.
+ref: https://github.com/influxdata/influxdb-client-go#influxdb-18-api-compatibility
 
-Ref: https://docs.influxdata.com/influxdb/v2.0/tools/grafana/?t=InfluxQL#view-and-create-influxdb-dbrp-mappings
-
-When using InfluxQL to query InfluxDB, the query must specify a database and a retention policy. InfluxDB DBRP mappings associate database and retention policy combinations with InfluxDB 2.0 buckets. DBRP mappings do not affect the retention period of the target bucket. These mappings allow queries following InfluxDB 1.x conventions to successfully query InfluxDB 2.0 buckets.
-
+* Use the form 'username:password' as the token value
+* Use the form 'database/retention-policy' as the bucket value
 
 ## Installation from source and contributing
 
