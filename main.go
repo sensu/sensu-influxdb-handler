@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,13 @@ type HandlerConfig struct {
 }
 
 var (
+	precisionMap = map[string]time.Duration{
+		"ns": time.Nanosecond,
+		"us": time.Microsecond,
+		"ms": time.Millisecond,
+		"s":  time.Second,
+	}
+
 	config = HandlerConfig{
 		PluginConfig: sensu.PluginConfig{
 			Name:     "sensu-influxdb-handler",
@@ -151,11 +159,41 @@ var (
 )
 
 func main() {
-	goHandler := sensu.NewGoHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
-	goHandler.Execute()
+	useStdin, err := testStdin()
+	if err != nil {
+		panic(err)
+	}
+	if useStdin {
+		goHandler := sensu.NewHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
+		goHandler.Execute()
+	} else {
+		panic(fmt.Errorf("Must supply Sensu event json on stdin\n"))
+	}
+}
+
+func testStdin() (bool, error) {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Printf("Error accessing stdin: %v\n", err)
+		return false, err
+	}
+	//Check the Mode bitmask for Named Pipe to indicate stdin is connected
+	if fi.Mode()&os.ModeNamedPipe != 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 func checkArgs(event *corev2.Event) error {
+
+	if _, ok := precisionMap[config.Precision]; !ok {
+		keys := []string{}
+		for key, _ := range precisionMap {
+			keys = append(keys, key)
+		}
+
+		return fmt.Errorf("--precision must be one of: %v\n", keys)
+	}
 	if len(config.Addr) == 0 {
 		return errors.New("--address must be provided\n")
 	}
@@ -188,11 +226,13 @@ func checkArgs(event *corev2.Event) error {
 }
 
 func sendMetrics(event *corev2.Event) error {
+	return nil
 	var writeErrors []error
 	c := influxdb2.NewClientWithOptions(
 		config.Addr,
 		config.Token,
 		influxdb2.DefaultOptions().
+			SetPrecision(precisionMap[config.Precision]).
 			SetTLSConfig(&tls.Config{
 				InsecureSkipVerify: config.InsecureSkipVerify,
 			}))

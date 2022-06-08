@@ -299,6 +299,7 @@ func TestCheckArgCompatV1(t *testing.T) {
 	err := checkArgs(event)
 	assert.Error(err)
 
+	config.Precision = "ns"
 	config.Addr = "http://example.com"
 	config.Password = "password"
 	config.Username = "user"
