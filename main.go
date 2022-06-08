@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -173,24 +172,11 @@ func main() {
 	goHandler.Execute()
 }
 
-func testStdin() (bool, error) {
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		fmt.Printf("Error accessing stdin: %v\n", err)
-		return false, err
-	}
-	//Check the Mode bitmask for Named Pipe to indicate stdin is connected
-	if fi.Mode()&os.ModeNamedPipe != 0 {
-		return true, nil
-	}
-	return false, nil
-}
-
 func checkArgs(event *corev2.Event) error {
 
 	if _, ok := precisionMap[config.Precision]; !ok {
 		keys := []string{}
-		for key, _ := range precisionMap {
+		for key := range precisionMap {
 			keys = append(keys, key)
 		}
 
