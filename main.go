@@ -41,6 +41,21 @@ type HandlerConfig struct {
 	Legacy             bool
 }
 
+const (
+	addr               = "addr"
+	token              = "token"
+	bucket             = "bucket"
+	org                = "org"
+	username           = "username"
+	password           = "password"
+	dbName             = "db-name"
+	precision          = "precision"
+	legacy             = "legacy"
+	insecureSkipVerify = "insecure-skip-verify"
+	checkStatusMetric  = "check-status-metric"
+	stripHost          = "strip-host"
+)
+
 var (
 	precisionMap = map[string]time.Duration{
 		"ns": time.Nanosecond,
@@ -61,7 +76,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "addr",
 			Env:       "INFLUXDB_ADDR",
-			Argument:  "addr",
+			Argument:  addr,
 			Shorthand: "a",
 			Default:   "http://localhost:8086",
 			Usage:     "the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
@@ -70,7 +85,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "token",
 			Env:       "INFLUXDB_TOKEN",
-			Argument:  "token",
+			Argument:  token,
 			Shorthand: "t",
 			Default:   "",
 			Usage:     "the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility",
@@ -80,7 +95,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "bucket",
 			Env:       "INFLUXDB_BUCKET",
-			Argument:  "bucket",
+			Argument:  bucket,
 			Shorthand: "b",
 			Default:   "",
 			Usage:     "the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility",
@@ -90,7 +105,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "org",
 			Env:       "INFLUXDB_ORG",
-			Argument:  "org",
+			Argument:  org,
 			Shorthand: "o",
 			Default:   "",
 			Usage:     "the influxdbv2 org, leave empty for influxdb v1.8 compatibility",
@@ -100,7 +115,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "username",
 			Env:       "INFLUXDB_USER",
-			Argument:  "username",
+			Argument:  username,
 			Shorthand: "u",
 			Default:   "",
 			Usage:     "(Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token",
@@ -109,7 +124,7 @@ var (
 		&sensu.PluginConfigOption[string]{
 			Path:      "password",
 			Env:       "INFLUXDB_PASS",
-			Argument:  "password",
+			Argument:  password,
 			Shorthand: "p",
 			Default:   "",
 			Secret:    true,
@@ -118,7 +133,7 @@ var (
 		},
 		&sensu.PluginConfigOption[string]{
 			Path:      "dbName",
-			Argument:  "dbName",
+			Argument:  dbName,
 			Shorthand: "d",
 			Default:   "",
 			Usage:     "(Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name",
@@ -126,7 +141,7 @@ var (
 		},
 		&sensu.PluginConfigOption[string]{
 			Path:      "precision",
-			Argument:  "precision",
+			Argument:  precision,
 			Shorthand: "",
 			Default:   "s",
 			Usage:     "the precision value of the metric",
@@ -134,7 +149,7 @@ var (
 		},
 		&sensu.PluginConfigOption[bool]{
 			Path:      "insecureSkipVerify",
-			Argument:  "insecureSkipVerify",
+			Argument:  insecureSkipVerify,
 			Shorthand: "i",
 			Default:   false,
 			Usage:     "if true, the influx client skips https certificate verification",
@@ -142,7 +157,7 @@ var (
 		},
 		&sensu.PluginConfigOption[bool]{
 			Path:      "checkStatusMetric",
-			Argument:  "checkStatusMetric",
+			Argument:  checkStatusMetric,
 			Shorthand: "c",
 			Default:   false,
 			Usage:     "if true, the check status result will be captured as a metric",
@@ -150,7 +165,7 @@ var (
 		},
 		&sensu.PluginConfigOption[bool]{
 			Path:      "stripHost",
-			Argument:  "stripHost",
+			Argument:  stripHost,
 			Shorthand: "",
 			Default:   false,
 			Usage:     "if true, we strip the host from the metric",
@@ -158,7 +173,7 @@ var (
 		},
 		&sensu.PluginConfigOption[bool]{
 			Path:      "legacy",
-			Argument:  "legacy",
+			Argument:  legacy,
 			Shorthand: "l",
 			Default:   false,
 			Usage:     "(Deprecated) if true, parse the metric w/ legacy format",

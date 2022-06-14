@@ -40,19 +40,20 @@ Usage:
   sensu-influxdb-handler [flags]
 
 Flags:
-  -a, --addr string          the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
-  -b, --bucket string        the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility
-  -c, --checkStatusMetric    if true, the check status result will be captured as a metric
-  -d, --dbName string        (Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name
-  -h, --help                 help for sensu-influxdb-handler
-  -i, --insecureSkipVerify   if true, the influx client skips https certificate verification
-  -l, --legacy               (Deprecated) if true, parse the metric w/ legacy format
-  -o, --org string           the influxdbv2 org, leave empty for influxdb v1.8 compatibility
-  -p, --password string      (Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token
-      --precision string     the precision value of the metric (default "s")
-      --stripHost            if true, we strip the host from the metric
-  -t, --token string         the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility
-  -u, --username string      (Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token
+  -a, --addr string            the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
+  -b, --bucket string          the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility
+  -c, --check-status-metric    if true, the check status result will be captured as a metric
+  -d, --db-name string         (Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name
+  -h, --help                   help for sensu-influxdb-handler
+  -i, --insecure-skip-verify   if true, the influx client skips https certificate verification
+  -l, --legacy                 (Deprecated) if true, parse the metric w/ legacy format
+  -o, --org string             the influxdbv2 org, leave empty for influxdb v1.8 compatibility
+  -p, --password string        (Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token
+      --precision string       the precision value of the metric (default "s")
+      --strip-host             if true, we strip the host from the metric
+  -t, --token string           the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility
+  -u, --username string        (Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token
+
 ```
 
 ### Environment variables
