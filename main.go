@@ -1,21 +1,36 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	client "github.com/influxdata/influxdb1-client/v2"
-	"github.com/sensu-community/sensu-plugin-sdk/sensu"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/sensu/sensu-plugin-sdk/sensu"
+
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 )
+
+type errSlice []error
+
+func (eSlice errSlice) Error() string {
+	var eStrings []string
+	for _, e := range eSlice {
+		eStrings = append(eStrings, e.Error())
+	}
+	return strings.Join(eStrings, "\n")
+}
 
 // HandlerConfig for runtime values
 type HandlerConfig struct {
 	sensu.PluginConfig
 	Addr               string
+	Token              string
+	Bucket             string
+	Org                string
 	Username           string
 	Password           string
 	DbName             string
@@ -28,17 +43,27 @@ type HandlerConfig struct {
 
 const (
 	addr               = "addr"
+	token              = "token"
+	bucket             = "bucket"
+	org                = "org"
 	username           = "username"
 	password           = "password"
 	dbName             = "db-name"
 	precision          = "precision"
+	legacy             = "legacy"
 	insecureSkipVerify = "insecure-skip-verify"
 	checkStatusMetric  = "check-status-metric"
 	stripHost          = "strip-host"
-	legacy             = "legacy-format"
 )
 
 var (
+	precisionMap = map[string]time.Duration{
+		"ns": time.Nanosecond,
+		"us": time.Microsecond,
+		"ms": time.Millisecond,
+		"s":  time.Second,
+	}
+
 	config = HandlerConfig{
 		PluginConfig: sensu.PluginConfig{
 			Name:     "sensu-influxdb-handler",
@@ -47,94 +72,155 @@ var (
 		},
 	}
 
-	influxdbConfigOptions = []*sensu.PluginConfigOption{
-		{
-			Path:      addr,
+	influxdbConfigOptions = []sensu.ConfigOption{
+		&sensu.PluginConfigOption[string]{
+			Path:      "addr",
 			Env:       "INFLUXDB_ADDR",
 			Argument:  addr,
 			Shorthand: "a",
 			Default:   "http://localhost:8086",
-			Usage:     "the address of the influxdb server, should be of the form 'http://host:port', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
+			Usage:     "the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable",
 			Value:     &config.Addr,
 		},
-		{
-			Path:      username,
+		&sensu.PluginConfigOption[string]{
+			Path:      "token",
+			Env:       "INFLUXDB_TOKEN",
+			Argument:  token,
+			Shorthand: "t",
+			Default:   "",
+			Usage:     "the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility",
+			Value:     &config.Token,
+			Secret:    true,
+		},
+		&sensu.PluginConfigOption[string]{
+			Path:      "bucket",
+			Env:       "INFLUXDB_BUCKET",
+			Argument:  bucket,
+			Shorthand: "b",
+			Default:   "",
+			Usage:     "the influxdbv2 bucket, use '<database>/<retention-policy>' as bucket for influxdb v1.8 compatibility",
+			Value:     &config.Bucket,
+			Secret:    true,
+		},
+		&sensu.PluginConfigOption[string]{
+			Path:      "org",
+			Env:       "INFLUXDB_ORG",
+			Argument:  org,
+			Shorthand: "o",
+			Default:   "",
+			Usage:     "the influxdbv2 org, leave empty for influxdb v1.8 compatibility",
+			Value:     &config.Org,
+			Secret:    true,
+		},
+		&sensu.PluginConfigOption[string]{
+			Path:      "username",
 			Env:       "INFLUXDB_USER",
 			Argument:  username,
 			Shorthand: "u",
 			Default:   "",
-			Usage:     "the username for the given db, defaults to value of INFLUXDB_USER env variable",
+			Usage:     "(Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token",
 			Value:     &config.Username,
 		},
-		{
-			Path:      password,
+		&sensu.PluginConfigOption[string]{
+			Path:      "password",
 			Env:       "INFLUXDB_PASS",
 			Argument:  password,
 			Shorthand: "p",
 			Default:   "",
 			Secret:    true,
-			Usage:     "the password for the given db, defaults to value of INFLUXDB_PASS env variable",
+			Usage:     "(Deprecated) the password for the given db. Transition to influxdb v1.8  compatible authentication token",
 			Value:     &config.Password,
 		},
-		{
-			Path:      dbName,
+		&sensu.PluginConfigOption[string]{
+			Path:      "dbName",
 			Argument:  dbName,
 			Shorthand: "d",
 			Default:   "",
-			Usage:     "the influxdb to send metrics to",
+			Usage:     "(Deprecated) influx v1.8 database to send metrics to. Transition to influxdb v1.8 compatible bucket name",
 			Value:     &config.DbName,
 		},
-		{
-			Path:      precision,
+		&sensu.PluginConfigOption[string]{
+			Path:      "precision",
 			Argument:  precision,
 			Shorthand: "",
 			Default:   "s",
 			Usage:     "the precision value of the metric",
 			Value:     &config.Precision,
 		},
-		{
-			Path:      insecureSkipVerify,
+		&sensu.PluginConfigOption[bool]{
+			Path:      "insecureSkipVerify",
 			Argument:  insecureSkipVerify,
 			Shorthand: "i",
 			Default:   false,
 			Usage:     "if true, the influx client skips https certificate verification",
 			Value:     &config.InsecureSkipVerify,
 		},
-		{
-			Path:      checkStatusMetric,
+		&sensu.PluginConfigOption[bool]{
+			Path:      "checkStatusMetric",
 			Argument:  checkStatusMetric,
 			Shorthand: "c",
 			Default:   false,
 			Usage:     "if true, the check status result will be captured as a metric",
 			Value:     &config.CheckStatusMetric,
 		},
-		{
-			Path:      stripHost,
+		&sensu.PluginConfigOption[bool]{
+			Path:      "stripHost",
 			Argument:  stripHost,
 			Shorthand: "",
 			Default:   false,
 			Usage:     "if true, we strip the host from the metric",
 			Value:     &config.StripHost,
 		},
-		{
-			Path:      legacy,
+		&sensu.PluginConfigOption[bool]{
+			Path:      "legacy",
 			Argument:  legacy,
 			Shorthand: "l",
 			Default:   false,
-			Usage:     "if true, parse the metric w/ legacy format",
+			Usage:     "(Deprecated) if true, parse the metric w/ legacy format",
 			Value:     &config.Legacy,
 		},
 	}
 )
 
 func main() {
-	goHandler := sensu.NewGoHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
+	goHandler := sensu.NewHandler(&config.PluginConfig, influxdbConfigOptions, checkArgs, sendMetrics)
 	goHandler.Execute()
 }
 
 func checkArgs(event *corev2.Event) error {
-	if len(config.DbName) == 0 {
-		return errors.New("missing db name")
+
+	if _, ok := precisionMap[config.Precision]; !ok {
+		keys := []string{}
+		for key := range precisionMap {
+			keys = append(keys, key)
+		}
+
+		return fmt.Errorf("--precision must be one of: %v\n", keys)
+	}
+	if len(config.Addr) == 0 {
+		return errors.New("--address must be provided\n")
+	}
+	if len(config.Bucket) > 0 && len(config.DbName) > 0 {
+		return errors.New("Cannot set both --bucket and --dbName\n")
+	}
+	if len(config.Bucket) == 0 && len(config.DbName) == 0 {
+		return errors.New("Must specify either --bucket or --dbName\n")
+	}
+
+	if len(config.Bucket) == 0 {
+		if len(config.DbName) > 0 {
+			config.Bucket = config.DbName
+		}
+	}
+	if len(config.Token) == 0 {
+		token := ""
+		if len(config.Username) > 0 {
+			token = token + string(config.Username) + ":"
+		}
+		if len(config.Password) > 0 {
+			token = token + string(config.Password)
+		}
+		config.Token = token
 	}
 	if !event.HasMetrics() && !config.CheckStatusMetric {
 		return fmt.Errorf("event does not contain metrics")
@@ -143,26 +229,27 @@ func checkArgs(event *corev2.Event) error {
 }
 
 func sendMetrics(event *corev2.Event) error {
-	var pt *client.Point
-	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:               config.Addr,
-		Username:           config.Username,
-		Password:           config.Password,
-		InsecureSkipVerify: config.InsecureSkipVerify,
-	})
-	if err != nil {
-		return err
-	}
+	var writeErrors []error
+	c := influxdb2.NewClientWithOptions(
+		config.Addr,
+		config.Token,
+		influxdb2.DefaultOptions().
+			SetPrecision(precisionMap[config.Precision]).
+			SetTLSConfig(&tls.Config{
+				InsecureSkipVerify: config.InsecureSkipVerify,
+			}))
 	defer c.Close()
-
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  config.DbName,
-		Precision: config.Precision,
-	})
-	if err != nil {
-		return err
-	}
-
+	// Get non-blocking write client
+	writeAPI := c.WriteAPI(config.Org, config.Bucket)
+	//defer writeAPI.Flush()
+	// Get errors channel
+	errorsCh := writeAPI.Errors()
+	// Create go proc for reading and logging errors
+	go func() {
+		for err := range errorsCh {
+			writeErrors = append(writeErrors, err)
+		}
+	}()
 	// Add the check status field as a metric if requested. Measurement recorded as the check name.
 	if config.CheckStatusMetric && event.HasCheck() {
 		var statusMetric = &corev2.MetricPoint{
@@ -195,17 +282,14 @@ func sendMetrics(event *corev2.Event) error {
 		}
 
 		tags := setTags(event.Entity.Name, point.Tags)
-
-		pt, err = client.NewPoint(name, tags, fields, timestamp)
-		if err != nil {
-			return err
+		if len(name) > 0 {
+			pt := influxdb2.NewPoint(name, tags, fields, timestamp)
+			writeAPI.WritePoint(pt)
 		}
-		bp.AddPoint(pt)
 	}
 
 	// 1.x handler parity
 	annotate := eventNeedsAnnotation(event)
-
 	if annotate {
 		tags := make(map[string]string)
 		tags["entity"] = event.Entity.Name
@@ -214,10 +298,10 @@ func sendMetrics(event *corev2.Event) error {
 		title := fmt.Sprintf("%q", "Sensu Event")
 		description := fmt.Sprintf("%q", sensu.FormattedMessage(event))
 		fields := make(map[string]interface{})
-		fields["title"] = title
-		fields["description"] = description
-		fields["status"] = event.Check.Status
-		fields["occurrences"] = event.Check.Occurrences
+		fields["title"] = string(title)                      //explicit cast to string to prevent influx client error
+		fields["description"] = string(description)          //explicit cast to string to prevent influx client error
+		fields["status"] = int(event.Check.Status)           //explicit cast to int to prevent influx client error
+		fields["occurrences"] = int(event.Check.Occurrences) //explicit cast int to prevent influx client error
 
 		stringTimestamp := strconv.FormatInt(event.Timestamp, 10)
 		if len(stringTimestamp) > 10 {
@@ -229,18 +313,16 @@ func sendMetrics(event *corev2.Event) error {
 		}
 		timestamp := time.Unix(t, 0)
 
-		pt, err = client.NewPoint("sensu_event", tags, fields, timestamp)
-		if err != nil {
-			return err
-		}
-		bp.AddPoint(pt)
+		pt := influxdb2.NewPoint("sensu_event", tags, fields, timestamp)
+		writeAPI.WritePoint(pt)
 	}
-
-	if err = c.Write(bp); err != nil {
-		return err
+	writeAPI.Flush()
+	time.Sleep(time.Second)
+	if len(writeErrors) > 0 {
+		return errSlice(writeErrors)
 	}
-
-	return c.Close()
+	c.Close()
+	return nil
 }
 
 // Determine if an event needs an annotation

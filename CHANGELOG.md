@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Added '--bucket', '--token', and '--org' options to work with influxv2
+
+### Deprecated
+- Influx v1 arguments '--dbName', '--username', and '--password' deprecated, prefer using influxv1 compatible `--bucket` and `--token`
+
 ## [3.7.0] - 2021-02-26
 ### Changed
 - Q1 '21 handler maintenance:
