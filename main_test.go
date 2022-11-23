@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +23,7 @@ func TestStatusMetrics(t *testing.T) {
 	event.Metrics = nil
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := ioutil.ReadAll(r.Body)
+		body, _ := io.ReadAll(r.Body)
 		expectedBody := `check1,sensu_entity_name=entity1 status=0`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)
@@ -47,7 +47,7 @@ func TestSendMetrics(t *testing.T) {
 	event.Metrics = corev2.FixtureMetrics()
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := ioutil.ReadAll(r.Body)
+		body, _ := io.ReadAll(r.Body)
 		expectedBody := `answer,foo=bar,sensu_entity_name=entity1 value=42`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)
@@ -67,7 +67,7 @@ func TestSendMetricsWithToken(t *testing.T) {
 	event.Metrics = corev2.FixtureMetrics()
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := ioutil.ReadAll(r.Body)
+		body, _ := io.ReadAll(r.Body)
 		header := r.Header
 		assert.Contains(header["Authorization"][0], config.Token)
 		expectedBody := `answer,foo=bar,sensu_entity_name=entity1 value=42`
@@ -149,7 +149,7 @@ func TestSendMetricsHostStripping(t *testing.T) {
 		event.Metrics.Points[0].Name = tt.metricName + ".answer"
 
 		var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			body, _ := ioutil.ReadAll(r.Body)
+			body, _ := io.ReadAll(r.Body)
 			assert.Contains(string(body), tt.expectedBody)
 			w.WriteHeader(http.StatusOK)
 			_, err := w.Write([]byte(`{"ok": true}`))
@@ -173,7 +173,7 @@ func TestSendAnnotation(t *testing.T) {
 	event.Metrics = corev2.FixtureMetrics()
 
 	var apiStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ := ioutil.ReadAll(r.Body)
+		body, _ := io.ReadAll(r.Body)
 		expectedBody := `sensu_event,check=check1,entity=entity1 description="\"ALERT - entity1/check1 : FAILURE\"",occurrences=1i,status=1i,title="\"Sensu Event\""`
 		assert.Contains(string(body), expectedBody)
 		w.WriteHeader(http.StatusOK)

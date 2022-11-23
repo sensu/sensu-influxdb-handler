@@ -38,6 +38,12 @@ Check out [The Sensu Blog][5] or [Sensu Docs][6] for a step by step guide!
 ```
 Usage:
   sensu-influxdb-handler [flags]
+  sensu-influxdb-handler [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  version     Print the version number of this plugin
 
 Flags:
   -a, --addr string            the url of the influxdb server, should be of the form 'http://host:port/dbname', defaults to 'http://localhost:8086' or value of INFLUXDB_ADDR env variable (default "http://localhost:8086")
@@ -54,6 +60,7 @@ Flags:
   -t, --token string           the authentication token needed for influxdbv2, use '<user>:<password>' as token for influxdb 1.8 compatibility
   -u, --username string        (Deprecated) the username for the given db, Transition to influxdb v1.8 compatible authentication token
 
+Use "sensu-influxdb-handler [command] --help" for more information about a command.
 ```
 
 ### Environment variables
@@ -156,8 +163,8 @@ spec:
   timeout: 10
   env_vars:
   - INFLUXDB_ADDR=http://influxdb.default.svc.cluster.local:8086
-  - INFLUXDB_TOKEN="xxxx-xxxxx-xxxx-xxxx-xxxxx"
-  - INFLUXDB_BUCKET="some_bucket"
+  - INFLUXDB_TOKEN=xxxx-xxxxx-xxxx-xxxx-xxxxx
+  - INFLUXDB_BUCKET=some_bucket
   - INFLUXDB_ORG="some_org"
   filters:
   - has_metrics
@@ -180,8 +187,8 @@ spec:
   timeout: 10
   env_vars:
   - INFLUXDB_ADDR=http://influxdb.default.svc.cluster.local:8086
-  - INFLUXDB_TOKEN="username:password"
-  - INFLUXDB_BUCKET="database"
+  - INFLUXDB_TOKEN=username:password
+  - INFLUXDB_BUCKET=database
   filters:
   - has_metrics
   runtime_assets:
