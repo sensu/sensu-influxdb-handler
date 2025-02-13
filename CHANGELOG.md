@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [4.0.1] - 2025-02-13
+### Added
+- Support for darwin/arm64 build.
+
 ## [4.0.0] - 2022-06-16
 ### Added
 - Added '--bucket', '--token', and '--org' options to work with influxv2
